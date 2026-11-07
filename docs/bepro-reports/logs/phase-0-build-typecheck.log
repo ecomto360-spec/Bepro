@@ -1,0 +1,146 @@
+
+$ cd cod-client-astro && npm run typecheck
+
+> codflow-client-astro@1.1.0 typecheck
+> astro check
+
+20:57:41 [vite] Re-optimizing dependencies because vite config has changed
+20:57:41 [vite] Re-optimizing dependencies because vite config has changed
+20:57:42 [types] Generated 1.02s
+20:57:42 [check] Getting diagnostics for Astro files in /home/user/bepro/cod-client-astro...
+Killed
+npm error Lifecycle script `typecheck` failed with error:
+npm error code 137
+npm error path /home/user/bepro/cod-client-astro
+npm error workspace codflow-client-astro@1.1.0
+npm error location /home/user/bepro/cod-client-astro
+npm error command failed
+npm error command sh -c astro check
+
+$ cd cod-server && npm run build:ci
+npm warn config ignoring workspace config at /home/user/bepro/cod-server/.npmrc
+
+> codflow-server@1.1.0 build:ci
+> wrangler deploy --dry-run --outdir dist
+
+
+ ⛅️ wrangler 4.125.0 (update available 4.158.0)
+───────────────────────────────────────────────
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mMultiple environments are defined in the Wrangler configuration file, but no target environment was specified for the deploy command.[0m
+
+  To avoid unintentional changes to the wrong environment, it is recommended to explicitly specify the target environment using the `-e|--env` flag or CLOUDFLARE_ENV env variable.
+  If your intention is to use the top-level environment of your configuration simply pass an empty string to the flag to target such environment. For example `--env=""`.
+
+
+Total Upload: 4176.65 KiB / gzip: 779.39 KiB
+Your Worker has access to the following bindings:
+Binding                                                               Resource                  
+env.CAPI_WORKFLOW (CodCapiWorkflow)                                   Workflow                  
+env.LP_IMAGE_UPLOAD_WORKFLOW (CodLandingPageImageUploadWorkflow)      Workflow                  
+env.RATE_LIMIT (00000000000000000000000000000000)                     KV Namespace              
+env.OAUTH_KV (00000000000000000000000000000000)                       KV Namespace              
+env.DB (codflow-os-db)                                                D1 Database               
+env.IMAGES (codflow-images)                                           R2 Bucket                 
+env.IMAGE_TRANSFORM                                                   Images                    
+env.ENVIRONMENT ("development")                                       Environment Variable      
+env.WORKER_URL ("http://localhost:8787")                              Environment Variable      
+env.MEDIA_DOMAIN ("media.example.com")                                Environment Variable      
+env.R2_BUCKET_NAME ("codflow-images")                                 Environment Variable      
+env.BETTER_AUTH_URL ("http://localhost:4321/api/auth")                Environment Variable      
+env.WORKER_SELF_URL ("http://localhost:8787/")                        Environment Variable      
+env.ALLOWED_ORIGINS ("*")                                             Environment Variable      
+
+--dry-run: exiting now.
+
+$ cd cod-client-astro && npm run build
+
+> codflow-client-astro@1.1.0 build
+> astro build
+
+20:58:41 [types] Generated 111ms
+20:58:41 [build] output: "static"
+20:58:41 [build] mode: "server"
+20:58:41 [build] directory: /home/user/bepro/cod-client-astro/dist/
+20:58:41 [build] adapter: @astrojs/cloudflare
+20:58:41 [build] Collecting build info...
+20:58:41 [build] ✓ Completed in 193ms.
+20:58:41 [build] Building server entrypoints...
+Using secrets defined in .dev.vars
+20:58:42 [vite] ✓ built in 1.72s
+Using secrets defined in .dev.vars
+20:58:44 [vite] ✓ built in 1.04s
+20:58:47 [WARN] [vite] [plugin builtin:vite-reporter] 
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rolldownOptions.output.codeSplitting to improve chunking: https://rolldown.rs/reference/OutputOptions.codeSplitting
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+20:58:47 [vite] ✓ built in 3.17s
+Default inspector port 9229 not available, using 9232 instead
+
+Using secrets defined in dist/server/.prerender/.dev.vars
+
+ prerendering static routes 
+Killed
+npm error Lifecycle script `build` failed with error:
+npm error code 137
+npm error path /home/user/bepro/cod-client-astro
+npm error workspace codflow-client-astro@1.1.0
+npm error location /home/user/bepro/cod-client-astro
+npm error command failed
+npm error command sh -c astro build
+
+$ cd cod-astro/theme01 && npm run build
+
+> cod-astro-theme01@1.1.0 build
+> astro build
+
+20:58:52 [vite] Re-optimizing dependencies because vite config has changed
+20:58:52 [vite] Re-optimizing dependencies because vite config has changed
+20:58:53 [content] Syncing content
+20:58:53 [content] Synced content
+20:58:53 [types] Generated 654ms
+20:58:53 [build] output: "server"
+20:58:53 [build] mode: "server"
+20:58:53 [build] directory: /home/user/bepro/cod-astro/theme01/dist/
+20:58:53 [build] adapter: @astrojs/cloudflare
+20:58:53 [build] Collecting build info...
+20:58:53 [build] ✓ Completed in 806ms.
+20:58:53 [build] Building server entrypoints...
+Using secrets defined in .dev.vars
+20:58:54 [vite] ✓ built in 621ms
+20:58:54 [astro-icon] Loaded icons from src/icons, heroicons
+Using secrets defined in .dev.vars
+20:58:55 [vite] ✓ built in 831ms
+20:58:55 [vite] ✓ built in 155ms
+20:58:55 [build] Rearranging server assets...
+20:58:55 [build] ✓ Completed in 1.77s.
+20:58:55 [@astrojs/cloudflare] Injected immutable Cache-Control for /_astro/* into _headers.
+(-28 Bytes)	0.48% reduction in //dist/client/_astro/StoreLayout.astro_astro_type_script_index_0_lang.DW29SjRg.js
+(-1 Bytes)	1.20% reduction in //dist/client/_astro/_slug_.astro_astro_type_script_index_0_lang.DYxMaqbL.js
+(-1 Bytes)	1.20% reduction in //dist/client/_astro/_slug_.astro_astro_type_script_index_0_lang.DlW3q1BX.js
+(-1 Bytes)	1.16% reduction in //dist/client/_astro/_slug_.astro_astro_type_script_index_1_lang.CswuqSPi.js
+(-1 Bytes)	0.47% reduction in //dist/client/_astro/_slug_.astro_astro_type_script_index_1_lang.H2okZ0Lu.js
+(-1 Bytes)	1.19% reduction in //dist/client/_astro/_slug_.astro_astro_type_script_index_2_lang.DC4rFvvO.js
+(-1 Bytes)	1.19% reduction in //dist/client/_astro/_slug_.astro_astro_type_script_index_2_lang.FzMva9jH.js
+(-1 Bytes)	1.10% reduction in //dist/client/_astro/_slug_.astro_astro_type_script_index_3_lang.BPZVidRg.js
+(-1 Bytes)	1.10% reduction in //dist/client/_astro/_slug_.astro_astro_type_script_index_3_lang.Cq0_R1Kp.js
+(-1 Bytes)	1.08% reduction in //dist/client/_astro/_slug_.astro_astro_type_script_index_4_lang.B-LUPOci.js
+(-1 Bytes)	1.08% reduction in //dist/client/_astro/_slug_.astro_astro_type_script_index_4_lang.BCN-G-ch.js
+(-5 Bytes)	0.19% reduction in //dist/client/_astro/cart-render.0rNQdEAB.js
+(-5 Bytes)	0.21% reduction in //dist/client/_astro/cart.BM1uEZ14.js
+(-20 Bytes)	0.60% reduction in //dist/client/_astro/checkout.astro_astro_type_script_index_0_lang.CVuCwnV6.js
+(-1 Bytes)	1.19% reduction in //dist/client/_astro/checkout.astro_astro_type_script_index_1_lang.DC4rFvvO.js
+(-1 Bytes)	1.10% reduction in //dist/client/_astro/checkout.astro_astro_type_script_index_2_lang.BPZVidRg.js
+(-1 Bytes)	1.08% reduction in //dist/client/_astro/checkout.astro_astro_type_script_index_3_lang.BCN-G-ch.js
+(-16 Bytes)	0.46% reduction in //dist/client/_astro/otp-step.BaBkavsP.js
+(-21 Bytes)	0.81% reduction in //dist/client/_astro/page.y9laiLsY.js
+(-2 Bytes)	0.26% reduction in //dist/client/_astro/pixel.BQLTmwDR.js
+(-25 Bytes)	0.24% reduction in //dist/client/_astro/product.C2BDf1fl.js
+(-1 Bytes)	0.00% reduction in //dist/client/_astro/select-required.CZZgBSRs.js
+(-1 Bytes)	0.14% reduction in //dist/client/_astro/sticky-cta.B54AH1kz.js
+(-1 Bytes)	1.04% reduction in //dist/client/_astro/thank-you.astro_astro_type_script_index_0_lang.DLsLPy7s.js
+(-13 Bytes)	0.46% reduction in //dist/client/_astro/track-abandonment.Bg42qsBl.js
+(-13 Bytes)	1.11% reduction in //dist/client/_astro/turnstile-field.Dv2O0S2l.js
+✓ Successfully compressed a total of 26 JavaScript files for 164 Bytes.
+20:58:56 [build] Server built in 3.39s
+20:58:56 [build] Complete!

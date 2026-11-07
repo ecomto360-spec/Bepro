@@ -1,0 +1,59 @@
+
+$ cd cod-client-astro && npm run typecheck
+
+> codflow-client-astro@1.1.0 typecheck
+> astro check
+
+20:59:42 [types] Generated 132ms
+20:59:42 [check] Getting diagnostics for Astro files in /home/user/bepro/cod-client-astro...
+[96mscripts/security-probe.mjs[0m:[93m137[0m:[93m11[0m - [93mwarning[0m[90m ts(6133): [0m'body' is declared but its value is never read.
+
+[7m137[0m     const body = await res.text().catch(() => "");
+[7m   [0m [93m          ~~~~[0m
+
+[96msrc/components/layout/nav.tsx[0m:[93m18[0m:[93m3[0m - [93mwarning[0m[90m ts(6133): [0m'Store' is declared but its value is never read.
+
+[7m18[0m   Store,
+[7m  [0m [93m  ~~~~~[0m
+
+[96msrc/features/checkout-form/components/CheckoutFormApp.tsx[0m:[93m13[0m:[93m3[0m - [93mwarning[0m[90m ts(6133): [0m'Truck' is declared but its value is never read.
+
+[7m13[0m   Truck,
+[7m  [0m [93m  ~~~~~[0m
+
+
+<--- Last few GCs --->
+
+[6871:0x467cd000]    37358 ms: Scavenge (interleaved) 1019.0 (1040.4) -> 1017.6 (1044.6) MB, pooled: 0 MB, 16.43 / 0.00 ms  (average mu = 0.188, current mu = 0.025) allocation failure; 
+[6871:0x467cd000]    37979 ms: Mark-Compact (reduce) 1021.6 (1045.1) -> 1020.0 (1040.9) MB, pooled: 0 MB, 41.93 / 0.00 ms  (+ 458.6 ms in 0 steps since start of marking, biggest step 0.0 ms, walltime since start of marking 597 ms) (average mu = 0.265, cur
+
+<--- JS stacktrace --->
+
+FATAL ERROR: Reached heap limit Allocation failed - JavaScript heap out of memory
+----- Native stack trace -----
+
+ 1: 0xe48bbe node::OOMErrorHandler(char const*, v8::OOMDetails const&) [node]
+ 2: 0x1248d00 v8::Utils::ReportOOMFailure(v8::internal::Isolate*, char const*, v8::OOMDetails const&) [node]
+ 3: 0x1248fd7 v8::internal::V8::FatalProcessOutOfMemory(v8::internal::Isolate*, char const*, v8::OOMDetails const&) [node]
+ 4: 0x1477ee5  [node]
+ 5: 0x1491779 v8::internal::Heap::CollectGarbage(v8::internal::AllocationSpace, v8::internal::GarbageCollectionReason, v8::GCCallbackFlags) [node]
+ 6: 0x14d9ead v8::internal::MinorGCJob::Task::RunInternal() [node]
+ 7: 0x104a273  [node]
+ 8: 0x104d808 node::PerIsolatePlatformData::FlushForegroundTasksInternal() [node]
+ 9: 0x1d3a163  [node]
+10: 0x1d50e04  [node]
+11: 0x1d3aec7 uv_run [node]
+12: 0xea9736 node::SpinEventLoopInternal(node::Environment*) [node]
+13: 0x100e771 node::NodeMainInstance::Run() [node]
+14: 0xf64165 node::Start(int, char**) [node]
+15: 0x7f7818435ca8  [/lib/x86_64-linux-gnu/libc.so.6]
+16: 0x7f7818435d65 __libc_start_main [/lib/x86_64-linux-gnu/libc.so.6]
+17: 0xe9576e _start [node]
+Aborted
+npm error Lifecycle script `typecheck` failed with error:
+npm error code 134
+npm error path /home/user/bepro/cod-client-astro
+npm error workspace codflow-client-astro@1.1.0
+npm error location /home/user/bepro/cod-client-astro
+npm error command failed
+npm error command sh -c astro check
