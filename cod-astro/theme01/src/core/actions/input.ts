@@ -14,6 +14,8 @@ import { z } from "astro/zod";
  * silently never reaches cod-server. `placeOrderInput.test.ts` pins that.
  */
 export const placeOrderInput = z.object({
+    // Anti-bot honeypot. Empty for real shoppers; forwarded to cod-server.
+    website: z.string().max(200).optional(),
     // Optional because a basket order has no single representative product;
     // the handler below requires them whenever `items` is absent. They stay
     // on a plain z.object rather than a .superRefine() because `accept:

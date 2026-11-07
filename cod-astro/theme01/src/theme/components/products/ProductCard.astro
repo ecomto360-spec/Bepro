@@ -1,0 +1,25 @@
+---
+import type { StoreConfig } from "@/core/api/types";
+import { copy, localizedProductName, categoryNames, type BeproLocale } from "@/theme/content/bepro";
+const { product, config } = Astro.props as { product: any; config: StoreConfig };
+const lang = (config.lang === "ar" ? "ar" : "fr") as BeproLocale;
+const t = copy[lang];
+const name = localizedProductName(product, lang);
+const image = product.images?.[0]?.src ?? product.image ?? "/demo/products/performance-running.webp";
+const discount = product.compareAtPrice > product.price ? Math.round((1 - product.price / product.compareAtPrice) * 100) : 0;
+const categorySlug = product.category?.slug ?? "";
+const payload = { productId: product.id, productName: name, pricePerUnit: product.price, image, handle: product.handle, variants: product.variants ?? [], hasVariants: product.hasVariants };
+---
+<article class="product-card">
+  {discount > 0 && <span class="discount-badge">−{discount}%</span>}
+  <a class="product-media" href={`/products/${product.handle}`} aria-label={name}>
+    <img src={image} alt={name} width="600" height="600" loading="lazy" decoding="async" />
+  </a>
+  <div class="product-body">
+    {categorySlug && <span class="product-category">{categoryNames[categorySlug]?.[lang] ?? product.category?.name}</span>}
+    <a class="product-name" href={`/products/${product.handle}`}>{name}</a>
+    <div class="price-row"><span class="price-current">{product.price.toLocaleString("fr-DZ")} DA</span>{product.compareAtPrice > product.price && <span class="price-old">{product.compareAtPrice.toLocaleString("fr-DZ")} DA</span>}</div>
+    <button class="button button-primary" type="button" data-bepro-add data-product={JSON.stringify(payload)} data-added-label={t.added} data-options-label={t.chooseSize}>{product.hasVariants ? t.options : t.add}</button>
+    <p class="stock-note">{t.cod}</p>
+  </div>
+</article>

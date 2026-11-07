@@ -1,0 +1,49 @@
+---
+import StoreLayout from "@/theme/layouts/StoreLayout.astro";
+import ProductCard from "@/theme/components/products/ProductCard.astro";
+import { getStoreContext } from "@/theme/config/store";
+import { fetchProductByHandle, fetchCatalogProducts } from "@/core/api/client";
+import { copy, localizedProductName, categoryNames, variantDisplay, type BeproLocale } from "@/theme/content/bepro";
+const { config: baseConfig, content } = await getStoreContext();
+const requested = Astro.url.searchParams.get("lang") ?? Astro.cookies.get("bepro_lang")?.value;
+const lang = (requested === "ar" ? "ar" : "fr") as BeproLocale;
+const config = { ...baseConfig, lang }; const t = copy[lang];
+const product = await fetchProductByHandle(Astro.params.handle ?? "");
+if (!product) return Astro.redirect("/products");
+const allProducts = await fetchCatalogProducts({ limit: 100 });
+const related = allProducts.filter((p) => p.id !== product.id && p.categoryId === product.categoryId).slice(0, 4);
+const name = localizedProductName(product, lang); const image = product.images?.[0]?.src ?? product.image;
+const discount = product.compareAtPrice > product.price ? Math.round((1 - product.price / product.compareAtPrice) * 100) : 0;
+const payload = { productId: product.id, productName: name, pricePerUnit: product.price, image, handle: product.handle, variants: product.variants ?? [], hasVariants: product.hasVariants, quantity: 1 };
+const variants = (product.variants ?? []).filter((v) => v.active !== false);
+if (variants.length) { payload.selectedVariant = variants[0]; payload.hasVariants = false; }
+const structured = { "@context": "https://schema.org", "@type": "Product", name, image: new URL(image, Astro.url.origin).href, description: lang === "ar" ? t.description : product.description ?? t.description, sku: product.sku, brand: { "@type": "Brand", name: "bepro" }, offers: { "@type": "Offer", priceCurrency: "DZD", price: product.price, availability: "https://schema.org/InStock", url: Astro.url.href } };
+---
+<StoreLayout config={config} content={content} title={`${name} | bepro`} description={product.description ?? t.description} ogImage={image}>
+  <section class="product-detail"><div class="container"><div class="breadcrumbs"><a href="/">{t.home}</a><span>/</span><a href="/products">{t.products}</a><span>/</span><span>{name}</span></div><div class="product-detail-grid">
+    <div class="product-gallery">{discount > 0 && <span class="discount-badge">−{discount}%</span>}<img src={image} alt={name} width="1000" height="1000" fetchpriority="high" /></div>
+    <div class="product-info"><span class="product-category">{categoryNames[product.category?.slug]?.[lang] ?? product.category?.name}</span><h1>{name}</h1><div class="price-row"><span class="price-current" data-detail-price>{product.price.toLocaleString("fr-DZ")} DA</span>{product.compareAtPrice > product.price && <span class="price-old">{product.compareAtPrice.toLocaleString("fr-DZ")} DA</span>}</div><p class="product-description">{lang === "ar" ? t.description : product.description ?? t.description}</p>
+      {variants.length > 0 && <div><span class="option-label">{t.size}</span><div class="variant-pills" data-detail-variants>{variants.map((variant, index) => <button class:list={["variant-pill", index === 0 && "active"]} type="button" data-variant={JSON.stringify(variant)} aria-pressed={index === 0 ? "true" : "false"}>{variantDisplay(variant.variations)}</button>)}</div></div>}
+      <span class="option-label">{t.quantity}</span><div class="quantity-control"><button type="button" data-qty-minus aria-label={t.decrease}>−</button><input data-qty value="1" inputmode="numeric" aria-label={t.quantity} readonly /><button type="button" data-qty-plus aria-label={t.increase}>+</button></div>
+      <div class="product-purchase"><button class="button button-primary" type="button" data-bepro-add data-product={JSON.stringify(payload)}>{t.add}</button><button class="button button-accent" type="button" data-bepro-add data-buy-now data-product={JSON.stringify(payload)}>{t.buyNow}</button></div>
+      <div class="product-assurances"><span><b>✓</b>{t.cod}</span><span><b>✓</b>{t.delivery} — {t.deliveryText}</span><span><b>✓</b>{t.supportText}</span></div>
+    </div>
+  </div></div></section>
+  {related.length > 0 && <section class="section section-soft"><div class="container"><div class="section-head"><div><h2>{t.featured}</h2><p>{t.featuredSub}</p></div></div><div class="product-grid">{related.map((item) => <ProductCard product={item} config={config} />)}</div></div></section>}
+  <script type="application/ld+json" set:html={JSON.stringify(structured)} />
+  <script>
+    import "@/theme/scripts/cart";
+    const buttons = document.querySelectorAll<HTMLButtonElement>("[data-product]");
+    const quantity = document.querySelector<HTMLInputElement>("[data-qty]");
+    function payload() { return JSON.parse(buttons[0]?.dataset.product || "{}"); }
+    function update(next: any) { buttons.forEach((button) => { button.dataset.product = JSON.stringify(next); }); }
+    document.querySelectorAll<HTMLButtonElement>("[data-variant]").forEach((button) => button.addEventListener("click", () => {
+      document.querySelectorAll("[data-variant]").forEach((b) => { b.classList.remove("active"); b.setAttribute("aria-pressed", "false"); }); button.classList.add("active"); button.setAttribute("aria-pressed", "true");
+      const next = payload(); next.selectedVariant = JSON.parse(button.dataset.variant || "{}"); next.hasVariants = false; next.pricePerUnit = next.selectedVariant.price; update(next);
+      const price = document.querySelector("[data-detail-price]"); if (price) price.textContent = `${Number(next.pricePerUnit).toLocaleString("fr-DZ")} DA`;
+    }));
+    document.querySelector("[data-qty-minus]")?.addEventListener("click", () => { const next = payload(); next.quantity = Math.max(1, next.quantity - 1); if (quantity) quantity.value = String(next.quantity); update(next); });
+    document.querySelector("[data-qty-plus]")?.addEventListener("click", () => { const next = payload(); next.quantity = Math.min(100, next.quantity + 1); if (quantity) quantity.value = String(next.quantity); update(next); });
+    document.querySelector("[data-buy-now]")?.addEventListener("click", () => window.setTimeout(() => { window.location.href = "/checkout"; }, 100));
+  </script>
+</StoreLayout>

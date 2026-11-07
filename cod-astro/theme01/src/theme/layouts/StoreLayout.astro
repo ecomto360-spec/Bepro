@@ -6,109 +6,46 @@ import Footer from "@/theme/components/layout/Footer.astro";
 import CartDrawer from "@/theme/components/cart/CartDrawer.astro";
 import MobileNav from "@/theme/components/layout/MobileNav.astro";
 import WhatsAppWidget from "@/theme/components/chat/WhatsAppWidget.astro";
-import { showsWidgetOn } from "@/theme/utils/shows-widget-on";
+import ProductScripts from "@/theme/components/products/ProductScripts.astro";
 import type { StoreConfig } from "@/core/api/types";
 import type { StoreFrontContent } from "@/theme/config/content";
-import { Icon } from "astro-icon/components";
 import { DEFAULT_CONFIG } from "@/theme/config/store";
+import { copy, type BeproLocale } from "@/theme/content/bepro";
 
-interface Props {
-  title?: string;
-  description?: string;
-  ogImage?: string;
-  noindex?: boolean;
-  config?: StoreConfig;
-  content?: StoreFrontContent;
-  hideMobileNav?: boolean;
-  /** Marketing mode (landing pages): no header, no mobile nav, no footer —
-   *  the page is images + form + sticky CTA, nothing else. */
-  marketing?: boolean;
-  /** LCP images (landing page stack top) — preloaded in <head>. */
-  preloadImages?: string[];
-}
-
-const { title, description, ogImage, noindex, config: c, content, marketing = false, preloadImages } = Astro.props;
+interface Props { title?: string; description?: string; ogImage?: string; noindex?: boolean; config?: StoreConfig; content?: StoreFrontContent; hideMobileNav?: boolean; marketing?: boolean; preloadImages?: string[]; }
+const { title, description, ogImage, noindex, content, marketing = false, preloadImages } = Astro.props;
 const hideMobileNav = marketing || Astro.props.hideMobileNav;
-const config = c ?? DEFAULT_CONFIG;
-
-const isRTL = config.lang === "ar";
-const pageTitle = title ?? config.metaTitle ?? config.name;
-const pageDesc = description ?? config.metaDescription ?? (content?.defaultMetaDescription?.replace("{storeName}", config.name) ?? `Shop from ${config.name}`);
-const pageOg = ogImage ?? config.ogImage ?? "";
-
-// Sanitise theme values — never trust DB content as CSS
+const requested = Astro.url.searchParams.get("lang");
+if (requested === "ar" || requested === "fr") Astro.cookies.set("bepro_lang", requested, { path: "/", sameSite: "lax", maxAge: 31536000 });
+const selected = requested === "ar" || requested === "fr" ? requested : Astro.cookies.get("bepro_lang")?.value;
+const config = { ...(Astro.props.config ?? DEFAULT_CONFIG), lang: selected === "ar" ? "ar" : "fr" } as StoreConfig;
+const lang = config.lang as BeproLocale;
+const t = copy[lang];
+const isRTL = lang === "ar";
+const pageTitle = title ?? config.metaTitle ?? (lang === "ar" ? "bepro | متجرك الرياضي في الجزائر" : "bepro | Votre boutique sport en Algérie");
+const pageDesc = description ?? config.metaDescription ?? t.heroText;
+const pageOg = ogImage ?? config.ogImage ?? "/demo/hero-sport.webp";
 const HEX = /^#[0-9a-fA-F]{3,8}$/;
-const primary = HEX.test(config.primaryColor) ? config.primaryColor : "#7c3aed";
-const accent  = HEX.test(config.accentColor)  ? config.accentColor  : "#f59e0b";
-const bg      = HEX.test(config.bgColor)      ? config.bgColor      : "#f4f4f7";
-const font    = config.fontFamily.replace(/["<>]/g, "");
-
-// Google Fonts — default: Cairo (AR) + Plus Jakarta Sans (EN fallback)
-const fontHref = config.fontUrl?.replace(/["<>]/g, "")
-  ?? "https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap";
+const primary = HEX.test(config.primaryColor) ? config.primaryColor : "#075bbf";
+const accent = HEX.test(config.accentColor) ? config.accentColor : "#ea580c";
+const bg = HEX.test(config.bgColor) ? config.bgColor : "#ffffff";
+const font = "Inter, Cairo, Tajawal, sans-serif";
+const fontHref = "https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700;800;900&family=Tajawal:wght@400;500;700;800&display=swap";
 ---
-
 <!doctype html>
-<html lang={config.lang} dir={isRTL ? "rtl" : "ltr"}>
-  <BaseHead 
-    title={pageTitle}
-    description={pageDesc}
-    ogImage={pageOg}
-    noindex={noindex}
-    config={config}
-    primary={primary}
-    accent={accent}
-    bg={bg}
-    font={font}
-    fontHref={fontHref}
-    preloadImages={preloadImages}
-  />
-
+<html lang={lang} dir={isRTL ? "rtl" : "ltr"}>
+  <BaseHead title={pageTitle} description={pageDesc} ogImage={pageOg} noindex={noindex} config={config} primary={primary} accent={accent} bg={bg} font={font} fontHref={fontHref} preloadImages={preloadImages} />
   <body class:list={[!hideMobileNav && "has-mobile-nav"]}>
-    <!-- Announcement bar -->
-    {!marketing && (config.announcementBar || content?.announcementText) && (
-      <div class="store-announce">
-        <Icon name="heroicons:truck" class="w-3.5 h-3.5 opacity-80" />
-        <span>{config.announcementBar ?? content?.announcementText}</span>
-      </div>
-    )}
-
+    <a class="skip-link" href="#main-content">{lang === "ar" ? "انتقل إلى المحتوى" : "Aller au contenu"}</a>
+    {!marketing && <div class="top-marquee" aria-label={t.delivery}><div class="marquee-track">{Array.from({ length: 6 }).map(() => <><span>{t.delivery}</span><i>✦</i><span>{t.cod}</span><i>✦</i><span>{t.support}</span><i>✦</i></>)}</div></div>}
     {!marketing && <Header config={config} content={content} />}
-
-    <main>
-      <slot />
-    </main>
-
+    <main id="main-content"><slot /></main>
     {!marketing && <Footer config={config} content={content} />}
-
-    {/* One drawer per page, outside the main flow so its fixed positioning is
-        never trapped by a transformed ancestor. Rendered only when the cart is
-        on: a merchant who never enabled it ships none of this markup. */}
-    {config.cartEnabled && content && (
-      <>
-        <CartDrawer content={content} currency={config.currencySymbol} />
-        {/* Imported for its side effect: the module self-initialises on
-            DOMContentLoaded, the same pattern product.ts uses. Calling
-            initCart() here as well used to bind every handler twice. */}
-        <script>
-          import "@/theme/scripts/cart-ui";
-        </script>
-      </>
-    )}
-
-    {/* WhatsApp Chat Widget — merchant-configurable contact handoff.
-        Rendered only when configured, non-null, and enabled on the current surface. 
-        EXCEPTION: On thank-you page, we show an inline button instead of the floating widget. */}
-    {config.whatsapp && content && showsWidgetOn(config.whatsapp.surfaces, Astro.url.pathname) && Astro.url.pathname !== "/thank-you" && (
-      <>
-        <WhatsAppWidget widget={config.whatsapp} content={content} config={config} />
-        {/* Imported for side effect: self-initialises on DOM ready */}
-        <script>
-          import "@/theme/scripts/whatsapp-widget";
-        </script>
-      </>
-    )}
-
-    {!hideMobileNav && <MobileNav config={config} content={content} />}
+    {!marketing && <CartDrawer config={config} content={content} />}
+    {!hideMobileNav && <MobileNav config={config} />}
+    {!marketing && <WhatsAppWidget config={config} />}
+    {!marketing && <ProductScripts config={config} />}
+    <div class="bepro-toast" role="status" aria-live="polite" data-bepro-toast hidden></div>
+    <script type="application/ld+json" set:html={JSON.stringify({ "@context": "https://schema.org", "@type": "SportingGoodsStore", name: "bepro", url: Astro.url.origin, telephone: "+213550000000", address: { "@type": "PostalAddress", addressCountry: "DZ" }, priceRange: "DZD" })} />
   </body>
 </html>

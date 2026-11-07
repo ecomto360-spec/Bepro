@@ -1,45 +1,21 @@
 ---
-// ── CUSTOMIZE HERE ────────────────────────────────────────────────────────────
-// Category page: sibling category pills + filtered product grid.
-// Data is fetched in streaming component for optimal performance.
-// ─────────────────────────────────────────────────────────────────────────────
 import StoreLayout from "@/theme/layouts/StoreLayout.astro";
-import CategoryPageContent from "@/theme/components/category/CategoryPageContent.astro";
+import ProductCard from "@/theme/components/products/ProductCard.astro";
 import { getStoreContext } from "@/theme/config/store";
-import { fetchCategoriesRaw } from "@/core/api/client";
-
-const { slug } = Astro.params;
-
-// ── STREAMING OPTIMIZATION ──
-// Store context is fetched first (needed for layout)
-// Category data and products are fetched inside streaming component
-// This allows layout/navigation to render immediately while data loads
-const { config, content } = await getStoreContext();
-
-// Fetch categories for SEO meta tags (lightweight — no products)
-const categories = await fetchCategoriesRaw();
-const category = categories.find((c: any) => c.slug === slug);
-
-const metaTitle = category?.metaTitle || (category ? `${category.name} - ${config.name}` : config.name);
-const metaDescription = category?.metaDescription || category?.description || undefined;
-const ogImage = category?.imageUrl || undefined;
+import { fetchCatalogProducts, fetchCategoriesRaw } from "@/core/api/client";
+import { copy, categoryNames, type BeproLocale } from "@/theme/content/bepro";
+const { config: baseConfig, content } = await getStoreContext();
+const requested = Astro.url.searchParams.get("lang") ?? Astro.cookies.get("bepro_lang")?.value;
+const lang = (requested === "ar" ? "ar" : "fr") as BeproLocale;
+const config = { ...baseConfig, lang };
+const t = copy[lang]; const slug = Astro.params.slug ?? "";
+const [allProducts, categories] = await Promise.all([fetchCatalogProducts({ limit: 100 }), fetchCategoriesRaw()]);
+const category = categories.find((c) => c.slug === slug);
+if (!category) return Astro.redirect("/products");
+const title = categoryNames[slug]?.[lang] ?? category.name;
+const products = allProducts.filter((p) => p.category?.slug === slug || p.categoryId === category.id);
 ---
-
-<StoreLayout
-  config={config}
-  content={content}
-  title={metaTitle}
-  description={metaDescription}
-  ogImage={ogImage}
->
-  <!--
-    CategoryPageContent streams in after layout renders
-    Category lookup and products fetch happen inside component
-  -->
-  <CategoryPageContent
-    slug={slug!}
-    currencySymbol={config.currencySymbol}
-    content={content}
-    configName={config.name}
-  />
+<StoreLayout config={config} content={content} title={`${title} | bepro`} description={`${title} — ${t.heroText}`}>
+  <section class="page-hero"><div class="container"><div class="breadcrumbs"><a href="/">{t.home}</a><span>/</span><a href="/products">{t.categories}</a><span>/</span><span>{title}</span></div><h1>{title}</h1><p>{products.length} {t.results} · {t.cod} · {t.delivery}</p></div></section>
+  <section class="section"><div class="container"><div class="filter-chips">{categories.map((c) => <a class:list={["filter-chip", c.slug === slug && "active"]} href={`/category/${c.slug}`}>{categoryNames[c.slug]?.[lang] ?? c.name}</a>)}</div><div class="product-grid">{products.map((product) => <ProductCard product={product} config={config} />)}</div><p style="margin-top:30px"><a class="button button-outline" href="/products">{t.viewAll} →</a></p></div></section>
 </StoreLayout>

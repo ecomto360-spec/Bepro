@@ -1,0 +1,28 @@
+---
+import StoreLayout from "@/theme/layouts/StoreLayout.astro";
+import { getStoreContext } from "@/theme/config/store";
+import { copy, type BeproLocale } from "@/theme/content/bepro";
+const { config: baseConfig, content } = await getStoreContext();
+const requested = Astro.url.searchParams.get("lang") ?? Astro.cookies.get("bepro_lang")?.value;
+const lang = (requested === "ar" ? "ar" : "fr") as BeproLocale;
+const config = { ...baseConfig, lang }; const t = copy[lang];
+---
+<StoreLayout config={config} content={content} title={`${t.cartTitle} | bepro`} noindex={true}>
+  <section class="page-hero"><div class="container"><h1>{t.cartTitle}</h1><p>{t.shippingCheckout}</p></div></section>
+  <section class="section"><div class="container cart-page-grid"><div class="cart-lines" data-cart-page-lines></div><aside class="cart-summary" data-cart-page-summary hidden><h2>{t.orderSummary}</h2><div class="summary-row"><span>{t.subtotal}</span><strong data-cart-page-subtotal></strong></div><div class="summary-row"><span>{t.shipping}</span><span>{t.shippingCheckout}</span></div><div class="summary-row summary-total"><span>{t.total}</span><span data-cart-page-subtotal></span></div><a class="button button-primary button-block" href="/checkout">{t.checkout} →</a><a class="button button-outline button-block" href="/products">{t.continue}</a></aside></div></section>
+  <script>
+    const emptyLabel = document.documentElement.lang === "ar" ? "سلتك فارغة" : "Votre panier est vide";
+    const emptyText = document.documentElement.lang === "ar" ? "اكتشف تشكيلتنا وأضف أساسياتك الرياضية." : "Découvrez notre sélection et ajoutez vos essentiels sport.";
+    const continueLabel = document.documentElement.lang === "ar" ? "مواصلة التسوق" : "Continuer mes achats";
+    const removeLabel = document.documentElement.lang === "ar" ? "إزالة" : "Retirer";
+    import { getCart, subscribe, cartSubtotal, setQuantity, removeLine, lineKey, type CartLine } from "@/theme/scripts/cart";
+    const list = document.querySelector<HTMLElement>("[data-cart-page-lines]"); const summary = document.querySelector<HTMLElement>("[data-cart-page-summary]");
+    function render(lines: CartLine[]) {
+      if (!list || !summary) return; list.replaceChildren(); summary.hidden = !lines.length;
+      document.querySelectorAll("[data-cart-page-subtotal]").forEach((el) => { el.textContent = `${cartSubtotal(lines).toLocaleString("fr-DZ")} DA`; });
+      if (!lines.length) { const empty = document.createElement("div"); empty.className = "empty-state"; const h = document.createElement("h2"); h.textContent = emptyLabel; const p = document.createElement("p"); p.textContent = emptyText; const a = document.createElement("a"); a.className = "button button-primary"; a.href = "/products"; a.textContent = continueLabel; empty.append(h, p, a); list.append(empty); return; }
+      lines.forEach((line) => { const key = lineKey(line.productId, line.variantId); const row = document.createElement("article"); row.className = "cart-line"; const img = document.createElement("img"); img.src = line.image || "/demo/products/performance-running.webp"; img.alt = ""; const info = document.createElement("div"); const h = document.createElement("h2"); h.textContent = line.productName; const small = document.createElement("small"); small.textContent = line.variantLabel || ""; const actions = document.createElement("div"); actions.className = "drawer-item-actions"; const minus = document.createElement("button"); minus.textContent = "−"; minus.onclick = () => setQuantity(key, line.quantity - 1); const qty = document.createElement("strong"); qty.textContent = String(line.quantity); const plus = document.createElement("button"); plus.textContent = "+"; plus.onclick = () => setQuantity(key, line.quantity + 1); const remove = document.createElement("button"); remove.className = "drawer-remove"; remove.textContent = removeLabel; remove.onclick = () => removeLine(key); actions.append(minus, qty, plus, remove); info.append(h, small, actions); const price = document.createElement("strong"); price.className = "drawer-item-price"; price.textContent = `${(line.unitPrice * line.quantity).toLocaleString("fr-DZ")} DA`; row.append(img, info, price); list.append(row); });
+    }
+    render(getCart()); subscribe(render);
+  </script>
+</StoreLayout>

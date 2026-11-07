@@ -64,3 +64,7 @@ partner-client-astro/
 
 # Closed-source cloud release runbook skill — local only.
 .opencode/skills/codflow-release/
+
+# Playwright local artifacts
+test-results/
+playwright-report/

@@ -53,6 +53,12 @@ export async function fetchProductsRaw(params?: {
   }
 }
 
+/** Storefront cards need real variants for the options modal. */
+export async function fetchCatalogProducts(params?: { categoryId?: string; featured?: boolean; limit?: number }): Promise<any[]> {
+  const products = await fetchProductsRaw(params);
+  return Promise.all(products.map(async (product) => product.hasVariants ? (await fetchProductByHandle(product.handle)) ?? product : product));
+}
+
 export async function fetchCategoriesRaw(): Promise<any[]> {
   try {
     const res = await fetch(`${COD_SERVER_URL}/store/categories`, {
@@ -130,6 +136,28 @@ export async function fetchStorePage(slug: string): Promise<StorePagePublic | nu
  * one browser event is recoverable; reporting it to the wrong ad account is
  * not — the server mirror still arrives either way.
  */
+export interface CustomerOrderTracking {
+  orderNumber: string;
+  status: "pending" | "confirmed" | "dispatched" | "delivered" | "returned";
+  total: number;
+  deliveryFee: number;
+  deliveryType: "home" | "stop_desk";
+  createdAt: string;
+  destination: { wilaya: string; wilayaAr: string };
+  items: Array<{ productName: string; variantLabel: string | null; quantity: number; total: number }>;
+}
+
+export async function trackCustomerOrder(orderNumber: string, phone: string): Promise<CustomerOrderTracking> {
+  const res = await fetch(`${COD_SERVER_URL}/store/track-order`, {
+    method: "POST",
+    headers: storeHeaders(),
+    body: JSON.stringify({ orderNumber, phone }),
+  });
+  const json = await res.json() as { data?: CustomerOrderTracking; error?: string };
+  if (!res.ok || !json.data) throw new Error(json.error ?? "Commande introuvable");
+  return json.data;
+}
+
 export async function fetchOrderTracking(
   orderId: string,
 ): Promise<{ pixelId: string | null; event: "Purchase" | "Lead" | null } | null> {

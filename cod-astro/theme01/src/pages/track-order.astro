@@ -1,0 +1,44 @@
+---
+import StoreLayout from "@/theme/layouts/StoreLayout.astro";
+import { getStoreContext } from "@/theme/config/store";
+import { copy, type BeproLocale } from "@/theme/content/bepro";
+const { config: baseConfig, content } = await getStoreContext();
+const requested = Astro.url.searchParams.get("lang") ?? Astro.cookies.get("bepro_lang")?.value;
+const lang = (requested === "ar" ? "ar" : "fr") as BeproLocale;
+const config = { ...baseConfig, lang }; const t = copy[lang];
+const order = Astro.url.searchParams.get("order") ?? "";
+const labels = { pending: t.trackPending, confirmed: t.trackConfirmed, dispatched: t.trackDispatched, delivered: t.trackDelivered, returned: t.trackReturned };
+---
+<StoreLayout config={config} content={content} title={`${t.trackTitle} | bepro`} noindex={true}>
+  <section class="page-hero"><div class="container"><h1>{t.trackTitle}</h1><p>{t.trackText}</p></div></section>
+  <section class="section"><div class="container"><div class="track-box"><form class="track-form" data-track-form><div class="form-field"><label for="track-order-number">{t.orderNumber}</label><input class="field-input" id="track-order-number" name="orderNumber" value={order} placeholder="ORD-20261107-0001" required minlength="4" /></div><div class="form-field"><label for="track-phone">{t.phone}</label><input class="field-input" id="track-phone" name="phone" type="tel" dir="ltr" placeholder="0550 12 34 56" required minlength="9" /></div><button class="button button-primary" type="submit">{t.trackCta}</button></form><div class="form-error" data-track-error role="alert" hidden>{t.trackingNotFound}</div><div class="tracking-result" data-track-result hidden></div></div></div></section>
+  <script>
+    import "@/theme/scripts/cart";
+    const lang = document.documentElement.lang === "ar" ? "ar" : "fr";
+    const labels = lang === "ar" ? { pending: "تم استلام الطلب", confirmed: "تم تأكيد الطلب", dispatched: "تم إرسال الطلب", delivered: "تم تسليم الطلب", returned: "تم إرجاع / إلغاء الطلب" } : { pending: "Commande reçue", confirmed: "Commande confirmée", dispatched: "Commande expédiée", delivered: "Commande livrée", returned: "Commande retournée / annulée" };
+    const itemsLabel = lang === "ar" ? "المنتجات المطلوبة" : "Articles commandés";
+    const totalLabel = lang === "ar" ? "المجموع" : "Total";
+    const shippingLabel = lang === "ar" ? "التوصيل" : "Livraison";
+    const orderDateLabel = lang === "ar" ? "تاريخ الطلب" : "Commande passée le";
+    const errorLabel = lang === "ar" ? "الطلب غير موجود. تحقق من الرقم والهاتف." : "Commande introuvable. Vérifiez le numéro et le téléphone.";
+    const form = document.querySelector<HTMLFormElement>("[data-track-form]"); const result = document.querySelector<HTMLElement>("[data-track-result]"); const error = document.querySelector<HTMLElement>("[data-track-error]");
+    form?.addEventListener("submit", async (event) => {
+      event.preventDefault(); if (!result || !error) return; result.hidden = true; error.hidden = true;
+      const button = form.querySelector<HTMLButtonElement>("button")!; button.disabled = true;
+      try {
+        const data = new FormData(form); const response = await fetch("/api/track-order", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ orderNumber: data.get("orderNumber"), phone: data.get("phone") }) });
+        const json = await response.json(); if (!response.ok) throw new Error(json.error);
+        const order = json.data; result.replaceChildren();
+        const status = document.createElement("div"); status.className = "tracking-status"; status.textContent = labels[order.status as keyof typeof labels];
+        const timeline = document.createElement("div"); timeline.className = "tracking-timeline"; const states = ["pending", "confirmed", "dispatched", "delivered"]; const current = states.indexOf(order.status);
+        states.forEach((state, index) => { const step = document.createElement("div"); step.className = `tracking-step ${order.status !== "returned" && index <= current ? "done" : ""}`; step.textContent = labels[state as keyof typeof labels]; timeline.append(step); });
+        const date = document.createElement("p"); date.textContent = `${orderDateLabel} : ${new Date(order.createdAt).toLocaleDateString(lang === "ar" ? "ar-DZ" : "fr-DZ")}`;
+        const heading = document.createElement("h2"); heading.textContent = itemsLabel; const list = document.createElement("div");
+        order.items.forEach((item: any) => { const row = document.createElement("div"); row.className = "checkout-item"; const name = document.createElement("span"); name.textContent = `${item.productName}${item.variantLabel ? ` — ${item.variantLabel}` : ""} × ${item.quantity}`; const price = document.createElement("strong"); price.textContent = `${Number(item.total).toLocaleString("fr-DZ")} DA`; row.append(name, price); list.append(row); });
+        const shipping = document.createElement("div"); shipping.className = "summary-row"; shipping.textContent = `${shippingLabel} : ${Number(order.deliveryFee).toLocaleString("fr-DZ")} DA`;
+        const total = document.createElement("div"); total.className = "summary-row summary-total"; total.textContent = `${totalLabel} : ${Number(order.total).toLocaleString("fr-DZ")} DA`;
+        result.append(status, timeline, date, heading, list, shipping, total); result.hidden = false;
+      } catch { error.textContent = errorLabel; error.hidden = false; } finally { button.disabled = false; }
+    });
+  </script>
+</StoreLayout>

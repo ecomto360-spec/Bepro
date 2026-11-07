@@ -1,6 +1,8 @@
 import { Context } from "hono";
 import type { AppContext } from "@/types";
 import { getDb } from "@/db";
+import { checkStoreRateLimit } from "./rate-limit";
+import { sendNewOrderEmail } from "./order-notification";
 import * as queries from "./queries";
 import { storeOrderSchema, storeReviewSchema, validateCartSchema } from "./validation";
 import { NotFoundError, ValidationError, ConflictError, BusinessLogicError } from "@/lib/errors/classes";
@@ -224,6 +226,16 @@ export async function createStoreOrder(c: Context<AppContext>) {
   const submitted: import("./validation").StoreOrderInput =
     bodyData ?? storeOrderSchema.parse(await c.req.json());
 
+  if (submitted.website?.trim()) {
+    return c.json({ success: true, data: { id: crypto.randomUUID(), orderNumber: `ORD-${Date.now()}-BOT` } }, 201);
+  }
+  const rateIp = c.req.header("X-Forwarded-For")?.split(",")[0]?.trim() ?? c.req.header("CF-Connecting-IP") ?? "local";
+  const rate = await checkStoreRateLimit(c.env.RATE_LIMIT, "order", `${c.get("storeId")!}:${rateIp}`, 10);
+  if (!rate.allowed) {
+    c.header("Retry-After", String(rate.retryAfterSeconds));
+    return c.json({ success: false, error: "Trop de tentatives. Réessayez dans quelques minutes.", code: "ORDER_RATE_LIMITED" }, 429);
+  }
+
   // Turnstile bot gate — runs before the SKU/stock lookups so bot traffic is
   // rejected before spending D1 reads. No-op when the store has it disabled.
   await assertTurnstile(c, db, submitted);
@@ -376,6 +388,14 @@ export async function createStoreOrder(c: Context<AppContext>) {
     },
     snapshot
   );
+
+  await sendNewOrderEmail(db, {
+    orderId: order.id,
+    orderNumber: order.orderNumber,
+    customerName: customer.name,
+    phone: customer.phone,
+    total: order.price + order.deliveryFee,
+  });
 
   // Meta CAPI conversion event at checkout — evaluated against merchant's tracking mode.
   // When mode is instant "Purchase", sends Purchase (matching the thank-you Pixel).

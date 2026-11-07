@@ -36,6 +36,7 @@ export const server = {
       if (referer) forwardedHeaders["Referer"] = referer;
 
       const result = await placeOrder({
+        website: input.website,
         customerName: input.customerName,
         phone: input.phone,
         wilayaId: input.wilayaId,

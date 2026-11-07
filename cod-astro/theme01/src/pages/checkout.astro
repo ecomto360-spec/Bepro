@@ -18,7 +18,8 @@ import { getStoreContext } from "@/theme/config/store";
 import { actions, isInputError } from "astro:actions";
 import { Icon } from "astro-icon/components";
 
-const { config, content, isRTL } = await getStoreContext();
+const requestedLocale = Astro.url.searchParams.get("lang") ?? Astro.cookies.get("bepro_lang")?.value;
+const { config, content, isRTL } = await getStoreContext(requestedLocale === "ar" ? "ar" : "fr");
 
 // A merchant with the cart switched off has no basket to check out.
 if (!config.cartEnabled) return Astro.redirect("/", 302);
@@ -29,7 +30,7 @@ if (!config.cartEnabled) return Astro.redirect("/", 302);
 const result = Astro.getActionResult(actions.placeOrder);
 if (result?.data?.orderNumber) {
   return Astro.redirect(
-    `/thank-you?order=${encodeURIComponent(result.data.orderNumber)}&total=${result.data.total}&oid=${encodeURIComponent(result.data.orderId ?? "")}`,
+    `/merci?order=${encodeURIComponent(result.data.orderNumber)}&total=${result.data.total}&oid=${encodeURIComponent(result.data.orderId ?? "")}`,
     303,
   );
 }
@@ -119,7 +120,8 @@ const turnstileEnabled = config.turnstileEnabled === true && Boolean(config.turn
     <div id="checkout-main" class="space-y-5" hidden>
       <CheckoutSummary content={content} />
 
-      <form method="POST" action={actions.placeOrder} id="checkout-form" class="space-y-5">
+      <form method="POST" action={actions.placeOrder} id="checkout-form" class="space-y-5 checkout-form">
+        <div class="honeypot" aria-hidden="true"><label>Website<input type="text" name="website" tabindex="-1" autocomplete="off" /></label></div>
         {/* The basket, serialised at submit time so it always matches what the
             summary above is showing. */}
         <input type="hidden" name="items" value="" id="cart-items-input" />

@@ -1,0 +1,20 @@
+---
+import StoreLayout from "@/theme/layouts/StoreLayout.astro";
+import { getStoreContext } from "@/theme/config/store";
+import { fetchOrderTracking } from "@/core/api/client";
+import { copy, type BeproLocale } from "@/theme/content/bepro";
+const orderNumber = Astro.url.searchParams.get("order") ?? ""; const orderId = Astro.url.searchParams.get("oid") ?? "";
+if (!orderNumber) return Astro.redirect("/");
+const requested = Astro.url.searchParams.get("lang") ?? Astro.cookies.get("bepro_lang")?.value;
+const [storeCtx, tracking] = await Promise.all([getStoreContext(requested === "ar" ? "ar" : "fr"), fetchOrderTracking(orderId)]);
+const lang = (requested === "ar" ? "ar" : "fr") as BeproLocale;
+const config = { ...storeCtx.config, lang, pixelId: tracking?.pixelId ?? null }; const t = copy[lang];
+const total = Astro.url.searchParams.get("total"); const totalNum = total ? Number(total) : null;
+const checkoutEvent = tracking?.event ?? null; const pixelId = tracking?.pixelId ?? null;
+---
+<StoreLayout config={config} title={`${t.thanksTitle} | bepro`} noindex={true}>
+  <section class="section"><div class="container checkout-success"><div class="success-icon">✓</div><h1>{t.thanksTitle}</h1><p>{t.thanksText}</p><div class="order-number-box"><span>{t.orderNumber}</span><strong>{orderNumber}</strong><small>{t.keepNumber}</small></div>{totalNum != null && <div class="summary-row summary-total"><span>{t.total}</span><span>{totalNum.toLocaleString("fr-DZ")} DA</span></div>}<div class="success-actions"><a class="button button-primary" href={`/track-order?order=${encodeURIComponent(orderNumber)}`}>{t.track}</a><a class="button button-outline" href="/products">{t.continue}</a></div></div></section>
+</StoreLayout>
+{pixelId && checkoutEvent && <script type="text/javascript" set:html={`(function(){if(typeof fbq!=='function')return;var eventId=${JSON.stringify(orderId)};if(!eventId)return;fbq('trackSingle',${JSON.stringify(pixelId)},${JSON.stringify(checkoutEvent)},${JSON.stringify(totalNum)}?{value:${JSON.stringify(totalNum)},currency:'DZD'}:{},{eventID:eventId});})();`} />}
+<script is:inline define:vars={{ orderNumber, orderId }}>(function(){try{var sessionId=sessionStorage.getItem("cod_session_id");if(!sessionId)return;sessionStorage.removeItem("cod_session_id");fetch("/api/abandoned/convert",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({sessionId,orderId,orderNumber}),keepalive:true}).catch(function(){});}catch(e){}})();</script>
+<script>import { clearCart } from "@/theme/scripts/cart"; clearCart();</script>

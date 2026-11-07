@@ -1,0 +1,58 @@
+---
+import type { StoreConfig } from "@/core/api/types";
+import { copy, type BeproLocale } from "@/theme/content/bepro";
+const { config } = Astro.props as { config: StoreConfig };
+const t = copy[(config.lang === "ar" ? "ar" : "fr") as BeproLocale];
+---
+<div class="option-modal" data-option-modal hidden>
+  <button class="option-modal-backdrop" data-option-close aria-label={t.close}></button>
+  <section class="option-modal-card" role="dialog" aria-modal="true" aria-labelledby="option-modal-title">
+    <div class="option-modal-head"><h2 id="option-modal-title">{t.chooseSize}</h2><button class="icon-button" type="button" data-option-close>×</button></div>
+    <div class="option-modal-product"><img data-option-image src="" alt="" width="80" height="80" /><div><strong data-option-name></strong><p class="price-current" data-option-price></p></div></div>
+    <span class="option-label">{t.size}</span><div class="variant-pills" data-option-variants></div>
+    <button class="button button-primary button-block" type="button" data-option-confirm disabled>{t.add}</button>
+  </section>
+</div>
+<script>
+  import { addLine } from "@/theme/scripts/cart";
+  const modal = document.querySelector<HTMLElement>("[data-option-modal]");
+  const toast = document.querySelector<HTMLElement>("[data-bepro-toast]");
+  let current: any = null;
+  let selected: any = null;
+  let toastTimer: number;
+  function notify(message: string) {
+    if (!toast) return;
+    toast.textContent = message; toast.hidden = false;
+    clearTimeout(toastTimer); toastTimer = window.setTimeout(() => { toast.hidden = true; }, 2800);
+  }
+  function variantText(variations: any) { if (!variations) return ""; if (typeof variations === "object") return Object.values(variations).join(" / "); try { return Object.values(JSON.parse(String(variations))).join(" / "); } catch { return String(variations); } }
+  function add(product: any, variant: any = null) {
+    const label = variant ? variantText(variant.variations) : null;
+    addLine({ productId: product.productId, productName: product.productName, variantId: variant?.id ?? null, variantLabel: label, quantity: Math.max(1, Number(product.quantity) || 1), unitPrice: variant?.price ?? product.pricePerUnit, href: `/products/${product.handle}`, image: product.image });
+    notify(document.documentElement.lang === "ar" ? "تمت إضافة المنتج إلى السلة" : "Produit ajouté au panier");
+  }
+  function closeModal() { if (modal) modal.hidden = true; document.body.classList.remove("menu-open"); current = null; selected = null; }
+  function openModal(product: any) {
+    if (!modal) return;
+    current = product; selected = null;
+    modal.querySelector<HTMLElement>("[data-option-name]")!.textContent = product.productName;
+    modal.querySelector<HTMLImageElement>("[data-option-image]")!.src = product.image;
+    modal.querySelector<HTMLElement>("[data-option-price]")!.textContent = `${Number(product.pricePerUnit).toLocaleString("fr-DZ")} DA`;
+    const list = modal.querySelector<HTMLElement>("[data-option-variants]")!; list.replaceChildren();
+    product.variants.filter((v: any) => v.active !== false).forEach((variant: any) => {
+      const button = document.createElement("button"); button.type = "button"; button.className = "variant-pill";
+      button.textContent = variantText(variant.variations);
+      button.addEventListener("click", () => { selected = variant; list.querySelectorAll("button").forEach((b) => b.classList.remove("active")); button.classList.add("active"); modal.querySelector<HTMLButtonElement>("[data-option-confirm]")!.disabled = false; });
+      list.append(button);
+    });
+    modal.querySelector<HTMLButtonElement>("[data-option-confirm]")!.disabled = true;
+    modal.hidden = false; document.body.classList.add("menu-open"); list.querySelector<HTMLButtonElement>("button")?.focus();
+  }
+  document.addEventListener("click", (event) => {
+    const trigger = (event.target as HTMLElement).closest<HTMLButtonElement>("[data-bepro-add]");
+    if (trigger) { const product = JSON.parse(trigger.dataset.product || "{}"); product.hasVariants && product.variants?.length ? openModal(product) : add(product, product.selectedVariant ?? null); }
+    if ((event.target as HTMLElement).closest("[data-option-close]")) closeModal();
+  });
+  modal?.querySelector("[data-option-confirm]")?.addEventListener("click", () => { if (current && selected) { add(current, selected); closeModal(); } });
+  document.addEventListener("keydown", (event) => { if (event.key === "Escape") closeModal(); });
+</script>

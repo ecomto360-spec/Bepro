@@ -1,54 +1,25 @@
 ---
-// ── Home page layout ────────────────────────────────────────────────────────
-// Full home page: hero, categories, best sellers, how it works,
-// new arrivals, features bar, promo banner, testimonials.
-// Streaming components fetch their own data in parallel for optimal performance.
-// ─────────────────────────────────────────────────────────────────────────────
 import StoreLayout from "@/theme/layouts/StoreLayout.astro";
-import Hero from "@/theme/components/home/Hero.astro";
-import CategoryCards from "@/theme/components/home/CategoryCards.astro";
-import BestSellers from "@/theme/components/home/BestSellers.astro";
-import HowItWorks from "@/theme/components/home/HowItWorks.astro";
-import NewArrivals from "@/theme/components/home/NewArrivals.astro";
-import FeaturesBar from "@/theme/components/home/FeaturesBar.astro";
-import WhatsAppCTA from "@/theme/components/home/WhatsAppCTA.astro";
-import CustomerTestimonials from "@/theme/components/home/CustomerTestimonials.astro";
+import ProductCard from "@/theme/components/products/ProductCard.astro";
 import { getStoreContext } from "@/theme/config/store";
-
-const { config, content } = await getStoreContext();
+import { fetchCatalogProducts, fetchCategoriesRaw } from "@/core/api/client";
+import { copy, categoryNames, faq, testimonials, type BeproLocale } from "@/theme/content/bepro";
+const { config: baseConfig, content } = await getStoreContext();
+const requested = Astro.url.searchParams.get("lang") ?? Astro.cookies.get("bepro_lang")?.value;
+const lang = (requested === "ar" ? "ar" : "fr") as BeproLocale;
+const config = { ...baseConfig, lang };
+const t = copy[lang];
+const [products] = await Promise.all([fetchCatalogProducts({ limit: 100 }), fetchCategoriesRaw()]);
+const featured = products.filter((p) => p.storeFeatured).slice(0, 6);
+const promotions = [...products].filter((p) => p.compareAtPrice > p.price).sort((a, b) => (1 - b.price / b.compareAtPrice) - (1 - a.price / a.compareAtPrice)).slice(0, 8);
+const categoryIcons = ["M4 16 8 6l5 2 2 5 5 3v3H4v-3Z", "m8 4 4 2 4-2 5 5-3 3-2-2v10H8V10l-2 2-3-3 5-5Z", "M6 8h12l2 13H4L6 8Zm3 0V6a3 3 0 0 1 6 0v2", "M3 8h4v8H3zM17 8h4v8h-4zM7 11h10v2H7z", "M8 3h8v4H8zM6 7h12v14H6zM9 11h6v6H9z"];
 ---
-
-<StoreLayout config={config} content={content}>
-  <!-- Hero renders immediately (no data fetch) -->
-  <Hero content={content} />
-
-  <!-- CategoryCards streams (fetches categories) -->
-  <CategoryCards content={content} />
-
-  <!-- BestSellers streams (fetches featured products) -->
-  <BestSellers
-    currencySymbol={config.currencySymbol}
-    content={content}
-  />
-
-  <!-- HowItWorks renders immediately (presentational) -->
-  <HowItWorks content={content} />
-
-  <!-- NewArrivals streams (fetches products) -->
-  <NewArrivals
-    currencySymbol={config.currencySymbol}
-    content={content}
-  />
-
-  <!-- FeaturesBar renders immediately (presentational) -->
-  <FeaturesBar content={content} />
-
-  <!-- Promo banner renders immediately (presentational) -->
-  <WhatsAppCTA content={content} />
-
-  <!-- CustomerTestimonials streams (fetches reviews, conditional) -->
-  <CustomerTestimonials
-    config={config}
-    content={content}
-  />
+<StoreLayout config={config} content={content} preloadImages={["/demo/hero-sport.webp"]}>
+  <section class="hero"><div class="container hero-grid"><div class="hero-copy"><p class="hero-eyebrow">{t.heroEyebrow}</p><h1>{lang === "ar" ? <>تحرّك. <em>تقدّم.</em><br />أعد الكرة.</> : <>Bougez. <em>Performez.</em><br />Recommencez.</>}</h1><p>{t.heroText}</p><div class="hero-actions"><a class="button button-primary" href="/products">{t.heroCta}<span>→</span></a><a class="button button-outline" href="#promotions">{t.heroSecondary}</a></div><div class="hero-proof"><span><b>✓</b>{t.cod}</span><span><b>✓</b>{t.delivery}</span><span><b>✓</b>{t.support}</span></div></div><div class="hero-art"><img src="/demo/hero-sport.webp" alt={lang === "ar" ? "حذاء رياضي من bepro" : "Chaussure de sport bepro"} width="1800" height="1000" fetchpriority="high" /><div class="hero-card"><span class="hero-card-icon">✓</span><div><strong>58 {lang === "ar" ? "ولاية" : "wilayas"}</strong><small>{t.cod}</small></div></div></div></div></section>
+  <div class="container category-tiles">{Object.keys(categoryNames).map((slug, index) => <a class="category-tile" href={`/category/${slug}`}><svg viewBox="0 0 24 24"><path d={categoryIcons[index]} /></svg>{categoryNames[slug][lang]}</a>)}</div>
+  <section class="section" id="selection"><div class="container"><div class="section-head"><div><span class="section-kicker">BEPRO / 01</span><h2>{t.featured}</h2><p>{t.featuredSub}</p></div><a class="button button-outline" href="/products">{t.viewAll} →</a></div><div class="product-grid product-grid-featured">{featured.map((product) => <ProductCard product={product} config={config} />)}</div></div></section>
+  <section class="section section-soft" id="promotions"><div class="container"><div class="section-head"><div><span class="section-kicker">BEPRO / 02</span><h2>{t.promotions}</h2><p>{t.promotionsSub}</p></div><a class="button button-primary" href="/products?sort=discount">{t.viewAll} →</a></div><div class="product-grid">{promotions.map((product) => <ProductCard product={product} config={config} />)}</div></div></section>
+  <section class="section"><div class="container"><div class="section-head"><div><span class="section-kicker">BEPRO / 03</span><h2>{t.reviews}</h2><p>{t.reviewsSub}</p></div></div><div class="review-grid">{testimonials[lang].map(([name, city, quote]) => <article class="review-card"><div class="review-stars" aria-label="5/5">★★★★★</div><blockquote>“{quote}”</blockquote><div class="review-author"><span class="review-avatar">{name.charAt(0)}</span><div><strong>{name}</strong><small>{city} · {lang === "ar" ? "شراء مؤكد" : "Achat vérifié"}</small></div></div></article>)}</div></div></section>
+  <section class="section section-soft"><div class="container"><div class="section-head"><div><span class="section-kicker">BEPRO / 04</span><h2>{t.faq}</h2><p>{t.faqSub}</p></div></div><div class="faq-list">{faq[lang].map(([question, answer], index) => <details open={index === 0}><summary>{question}</summary><p>{answer}</p></details>)}</div></div></section>
+  <section class="section"><div class="container reassurance-grid">{[[t.delivery,t.deliveryText,"M3 6h11v11H3zM14 10h4l3 3v4h-7zM7 21h.01M18 21h.01"],[t.cod,t.codText,"M3 7h18v12H3zM3 11h18M7 16h3"],[t.support,t.supportText,"M4 4h16v13H8l-4 4V4Z"],[t.quality,t.qualityText,"m12 3 3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1 3-6Z"]].map(([title,text,path]) => <div class="reassurance-item"><span class="reassurance-icon"><svg viewBox="0 0 24 24"><path d={path}/></svg></span><div><strong>{title}</strong><small>{text}</small></div></div>)}</div></section>
 </StoreLayout>

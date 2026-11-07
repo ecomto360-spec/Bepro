@@ -24,6 +24,10 @@ interface Props {
 }
 
 const { title, description, ogImage, noindex, config, primary, fontHref, font, bg, accent, preloadImages } = Astro.props;
+const canonicalUrl = new URL(Astro.url);
+canonicalUrl.searchParams.delete("lang");
+const alternateAr = new URL(canonicalUrl); alternateAr.searchParams.set("lang", "ar");
+const absoluteOgImage = ogImage ? new URL(ogImage, Astro.url.origin).href : "";
 
 import { MEDIA_DOMAIN } from "astro:env/server";
 ---
@@ -35,13 +39,16 @@ import { MEDIA_DOMAIN } from "astro:env/server";
   <meta name="theme-color" content={primary} />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-  <link rel="icon" href="/favicon.ico" sizes="any" />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
   <title>{title}</title>
   <meta name="description" content={description} />
   {noindex && <meta name="robots" content="noindex,nofollow" />}
 
   <!-- SEO -->
-  <link rel="canonical" href={Astro.url.href} />
+  <link rel="canonical" href={canonicalUrl.href} />
+  <link rel="alternate" hreflang="fr-DZ" href={canonicalUrl.href} />
+  <link rel="alternate" hreflang="ar-DZ" href={alternateAr.href} />
+  <link rel="alternate" hreflang="x-default" href={canonicalUrl.href} />
   <meta name="author" content={config.name} />
 
   <!-- OG -->
@@ -49,7 +56,7 @@ import { MEDIA_DOMAIN } from "astro:env/server";
   <meta property="og:site_name" content={config.name} />
   <meta property="og:url" content={Astro.url.href} />
   <meta property="og:description" content={description} />
-  {ogImage && <meta property="og:image" content={ogImage} />}
+  {absoluteOgImage && <meta property="og:image" content={absoluteOgImage} />}
   <meta property="og:type" content="website" />
   <meta property="og:locale" content={config.lang === "ar" ? "ar_DZ" : "en_US"} />
 

@@ -16,6 +16,7 @@ const cacheProvider = isVercel
 
 export default defineConfig({
   output: "server",
+  devToolbar: { enabled: false },
   compressHTML: true,
   session: false,
   adapter,
@@ -25,7 +26,7 @@ export default defineConfig({
   routeRules: {
     "/": { maxAge: 60, swr: 3600, tags: ["home"] },
     "/products": { maxAge: 60, swr: 3600, tags: ["products"] },
-    "/products/[slug]": { maxAge: 60, swr: 86400, tags: ["products"] },
+    "/products/[handle]": { maxAge: 60, swr: 86400, tags: ["products"] },
     "/category/[slug]": { maxAge: 60, swr: 86400, tags: ["categories"] },
     "/lp/[slug]": { maxAge: 60, swr: 86400, tags: ["landing-pages"] },
     "/pages/[slug]": { maxAge: 3600, swr: 604800, tags: ["legal-pages"] },

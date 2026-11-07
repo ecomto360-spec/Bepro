@@ -1,26 +1,34 @@
 ---
-// ── CUSTOMIZE HERE ────────────────────────────────────────────────────────────
-// All-products listing page: category filter bar + product grid.
-// Data is fetched in streaming component for optimal performance.
-// ─────────────────────────────────────────────────────────────────────────────
 import StoreLayout from "@/theme/layouts/StoreLayout.astro";
-import ProductsListContent from "@/theme/components/products/ProductsListContent.astro";
+import ProductCard from "@/theme/components/products/ProductCard.astro";
 import { getStoreContext } from "@/theme/config/store";
-
-// ── STREAMING OPTIMIZATION ──
-// Store context is fetched first (needed for layout)
-// Products and categories are fetched inside streaming component
-// This allows layout/navigation to render immediately while data loads
-const { config, content } = await getStoreContext();
+import { fetchCatalogProducts, fetchCategoriesRaw } from "@/core/api/client";
+import { copy, categoryNames, localizedProductName, type BeproLocale } from "@/theme/content/bepro";
+const { config: baseConfig, content } = await getStoreContext();
+const requested = Astro.url.searchParams.get("lang") ?? Astro.cookies.get("bepro_lang")?.value;
+const lang = (requested === "ar" ? "ar" : "fr") as BeproLocale;
+const config = { ...baseConfig, lang };
+const t = copy[lang];
+const [allProducts, categories] = await Promise.all([fetchCatalogProducts({ limit: 100 }), fetchCategoriesRaw()]);
+const query = (Astro.url.searchParams.get("q") ?? "").trim().toLowerCase();
+const category = Astro.url.searchParams.get("category") ?? "";
+const sort = Astro.url.searchParams.get("sort") ?? "newest";
+let products = allProducts.filter((p) => (!category || p.category?.slug === category) && (!query || localizedProductName(p, lang).toLowerCase().includes(query)));
+if (sort === "price-asc") products.sort((a, b) => a.price - b.price);
+if (sort === "price-desc") products.sort((a, b) => b.price - a.price);
+if (sort === "name") products.sort((a, b) => localizedProductName(a, lang).localeCompare(localizedProductName(b, lang)));
+if (sort === "discount") products.sort((a, b) => (1 - b.price / b.compareAtPrice) - (1 - a.price / a.compareAtPrice));
+const perPage = 8; const pages = Math.max(1, Math.ceil(products.length / perPage));
+const page = Math.min(pages, Math.max(1, Number(Astro.url.searchParams.get("page")) || 1));
+const visible = products.slice((page - 1) * perPage, page * perPage);
+function pageUrl(value: number) { const url = new URL(Astro.url); url.searchParams.set("page", String(value)); url.searchParams.delete("lang"); return `${url.pathname}?${url.searchParams}`; }
 ---
-
-<StoreLayout config={config} content={content} title={`${content.allProductsSection} — ${config.name}`}>
-  <!-- 
-    ProductsListContent streams in after layout renders
-    Products and categories fetch in parallel inside component
-  -->
-  <ProductsListContent 
-    currencySymbol={config.currencySymbol}
-    content={content}
-  />
+<StoreLayout config={config} content={content} title={`${t.products} | bepro`}>
+  <section class="page-hero"><div class="container"><div class="breadcrumbs"><a href="/">{t.home}</a><span>/</span><span>{t.products}</span></div><h1>{t.products}</h1><p>{t.heroText}</p></div></section>
+  <section class="section"><div class="container">
+    <form class="catalog-toolbar" method="get" action="/products"><span class="catalog-count">{products.length} {t.results}</span><div class="catalog-controls"><input class="field-input" type="search" name="q" value={query} placeholder={t.search} aria-label={t.search} /><select class="field-select" name="sort" aria-label={t.sort} onchange="this.form.submit()"><option value="newest" selected={sort === "newest"}>{t.newest}</option><option value="price-asc" selected={sort === "price-asc"}>{t.priceAsc}</option><option value="price-desc" selected={sort === "price-desc"}>{t.priceDesc}</option><option value="discount" selected={sort === "discount"}>{t.promotions}</option><option value="name" selected={sort === "name"}>{t.name}</option></select><noscript><button class="button button-primary">{t.filter}</button></noscript></div>{category && <input type="hidden" name="category" value={category} />}</form>
+    <div class="filter-chips"><a class:list={["filter-chip", !category && "active"]} href="/products">{t.allCategories}</a>{categories.map((c) => <a class:list={["filter-chip", category === c.slug && "active"]} href={`/products?category=${c.slug}`}>{categoryNames[c.slug]?.[lang] ?? c.name}</a>)}</div>
+    {visible.length ? <div class="product-grid">{visible.map((product) => <ProductCard product={product} config={config} />)}</div> : <div class="empty-state"><h2>{t.noProducts}</h2><a class="button button-primary" href="/products">{t.viewAll}</a></div>}
+    {pages > 1 && <nav class="pagination" aria-label="Pagination">{page > 1 && <a href={pageUrl(page - 1)}>←</a>}{Array.from({ length: pages }, (_, i) => i + 1).map((value) => value === page ? <span class="current" aria-current="page">{value}</span> : <a href={pageUrl(value)}>{value}</a>)}{page < pages && <a href={pageUrl(page + 1)}>→</a>}</nav>}
+  </div></section>
 </StoreLayout>

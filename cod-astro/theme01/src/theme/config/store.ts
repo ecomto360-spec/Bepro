@@ -14,19 +14,19 @@ import type { StoreConfig } from "@/core/api/types";
 import type { StoreFrontContent } from "@/theme/content";
 
 export const DEFAULT_CONFIG: StoreConfig = {
-  id: "",
-  name: "متجري",
+  id: "store-local-dev",
+  name: "bepro",
   domain: null,
   logoUrl: null,
   themeId: "theme01",
-  primaryColor: "#7c3aed",
-  accentColor: "#f59e0b",
-  bgColor: "#f8f8f8",
-  fontFamily: "Cairo, sans-serif",
+  primaryColor: "#075bbf",
+  accentColor: "#ea580c",
+  bgColor: "#ffffff",
+  fontFamily: "Inter, Cairo, Tajawal, sans-serif",
   fontUrl: null,
-  lang: "ar",
+  lang: "fr",
   currency: "DZD",
-  currencySymbol: "دج",
+  currencySymbol: "DA",
   contentJson: null,
   metaTitle: null,
   metaDescription: null,
@@ -52,8 +52,9 @@ export interface StoreContext {
   isRTL: boolean;
 }
 
-export async function getStoreContext(): Promise<StoreContext> {
+export async function getStoreContext(locale?: "fr" | "ar"): Promise<StoreContext> {
   const config = (await fetchStoreConfig()) ?? DEFAULT_CONFIG;
+  if (locale) config.lang = locale;
   const content = resolveContent(config.lang, config.contentJson);
   const isRTL = config.lang === "ar";
   return { config, content, isRTL };

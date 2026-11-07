@@ -34,6 +34,8 @@ export const cartItemSchema = z.object({
 });
 
 export const storeOrderSchema = z.object({
+  /** Anti-bot honeypot. It is never persisted. */
+  website: z.string().max(200).optional(),
   customerName: z.string().min(2).max(100),
   // Algerian mobile only, normalized to the canonical local form "05XXXXXXXX".
   // Accepts 05…, +2135…, 2135…, 002135… with separators; rejects landlines,

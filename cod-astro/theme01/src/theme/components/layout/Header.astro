@@ -1,83 +1,58 @@
 ---
-import { Image } from "astro:assets";
 import type { StoreConfig } from "@/core/api/types";
 import type { StoreFrontContent } from "@/theme/config/content";
-import { Icon } from "astro-icon/components";
-import CartBadge from "@/theme/components/cart/CartBadge.astro";
-
-interface Props {
-  config: StoreConfig;
-  content?: StoreFrontContent;
-}
-const { config, content } = Astro.props;
+import { copy, categoryNames, type BeproLocale } from "@/theme/content/bepro";
+const { config } = Astro.props as { config: StoreConfig; content?: StoreFrontContent };
+const lang = (config.lang === "ar" ? "ar" : "fr") as BeproLocale;
+const t = copy[lang];
+const alternate = new URL(Astro.url); alternate.searchParams.set("lang", lang === "fr" ? "ar" : "fr");
+const categories = [
+  ["chaussures-de-sport", "shoe"], ["vetements-de-sport", "shirt"], ["sacs-de-sport", "bag"], ["equipements-entrainement", "weights"], ["accessoires", "watch"],
+] as const;
 ---
-
-<header
-  class="sticky top-0 z-50 transition-all duration-300 bg-white/80 backdrop-blur-xl border-b border-black/[.04]"
-  style="padding-top: var(--safe-top); height: calc(4.5rem + var(--safe-top));"
->
-  <div class="max-w-7xl mx-auto h-full flex items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
-
-    {/* Logo — start */}
-    <div class="flex items-center gap-2.5 shrink-0">
-      <a href="/" class="flex items-center gap-2.5 active:scale-95 transition-transform" aria-label={config.name}>
-        {config.logoUrl ? (
-          <Image
-            src={config.logoUrl}
-            alt={config.name}
-            width={160}
-            height={48}
-            format="webp"
-            quality={90}
-            class="h-9 sm:h-10 w-auto object-contain"
-            loading="eager"
-            decoding="async"
-          />
-        ) : (
-          <span
-            class="font-black text-2xl sm:text-3xl leading-none tracking-tighter uppercase"
-            style="color: var(--clr-primary)"
-          >
-            {config.name}
-          </span>
-        )}
-      </a>
-    </div>
-
-    {/* Nav links — center (desktop only) */}
-    <nav
-      class="hidden md:flex items-center gap-1 lg:gap-2 text-[0.9375rem] font-bold flex-1 justify-center"
-      aria-label={content?.ariaMainNavigation}
-    >
-      <a href="/" class="px-4 py-2 rounded-xl transition-all hover:text-primary active:scale-95" style="color: var(--clr-text)">
-        {content?.navHome}
-      </a>
-      <a href="/products" class="px-4 py-2 rounded-xl transition-all hover:text-primary active:scale-95" style="color: var(--clr-text)">
-        {content?.navProducts}
-      </a>
-      <a href="/#best-sellers" class="px-4 py-2 rounded-xl transition-all hover:text-primary active:scale-95" style="color: var(--clr-text)">
-        {content?.navBestSellers}
-      </a>
-      <a href="/#new-arrivals" class="px-4 py-2 rounded-xl transition-all hover:text-primary active:scale-95" style="color: var(--clr-text)">
-        {content?.navNewArrivals}
-      </a>
+<header class="bepro-header">
+  <div class="container header-main">
+    <button class="icon-button mobile-only" type="button" data-menu-open aria-label={t.menu}>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+    </button>
+    <a class="brand" href="/" aria-label="bepro — accueil">
+      <svg class="brand-mark" viewBox="0 0 48 48" aria-hidden="true"><path d="M8 8h18c9 0 14 4 14 11 0 4-2 7-6 9 5 1 8 4 8 9 0 8-6 11-16 11H8V8Zm12 9v7h5c3 0 5-1 5-4s-2-3-5-3h-5Zm0 15v7h6c4 0 6-1 6-4s-2-3-6-3h-6Z"/></svg>
+      <span>bepro<span>.</span></span>
+    </a>
+    <nav class="desktop-nav" aria-label="Navigation principale">
+      <a href="/">{t.home}</a><a href="/products">{t.products}</a><a href="/track-order">{t.track}</a>
     </nav>
-
-    {/* Search icon — end */}
-    <div class="flex items-center gap-1 sm:gap-2 shrink-0">
-      <a
-        href="/products"
-        class="p-2.5 rounded-full hover:bg-black/5 active:scale-90 transition-all"
-        style="color: var(--clr-text)"
-        aria-label={content?.searchLabel}
-      >
-        <Icon name="heroicons:magnifying-glass" class="w-[22px] h-[22px]" aria-hidden="true" />
-      </a>
-
-      {/* Cart trigger. Present only when the merchant enabled the cart, and it
-          keeps itself hidden until the basket has something in it. */}
-      {config.cartEnabled && content && <CartBadge content={content} />}
+    <div class="header-actions">
+      <a class="language-link" href={`${alternate.pathname}${alternate.search}`} hreflang={lang === "fr" ? "ar" : "fr"}>{t.language}</a>
+      <a class="icon-button desktop-only" href="/track-order" aria-label={t.track}><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-5 3-8 8-8s8 3 8 8"/></svg></a>
+      <button class="icon-button cart-trigger" type="button" data-cart-open aria-label={t.cart}>
+        <svg viewBox="0 0 24 24"><path d="M3 4h2l2.4 11.2a2 2 0 0 0 2 1.6h7.9a2 2 0 0 0 2-1.6L21 8H6M10 21h.01M17 21h.01"/></svg>
+        <span data-cart-count class="cart-count">0</span>
+      </button>
     </div>
-
+  </div>
+  <div class="container category-row desktop-only">
+    <details class="category-menu">
+      <summary><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg>{t.categories}<span>⌄</span></summary>
+      <div class="category-popover">
+        {categories.map(([slug]) => <a href={`/category/${slug}`}>{categoryNames[slug][lang]}<span>→</span></a>)}
+      </div>
+    </details>
+    {categories.map(([slug]) => <a class="category-link" href={`/category/${slug}`}>{categoryNames[slug][lang]}</a>)}
   </div>
 </header>
+<div class="mobile-menu" data-mobile-menu hidden>
+  <button class="menu-backdrop" data-menu-close aria-label={t.close}></button>
+  <aside class="menu-panel" aria-label={t.menu}>
+    <div class="menu-head"><strong>bepro.</strong><button class="icon-button" data-menu-close aria-label={t.close}>×</button></div>
+    <nav><a href="/">{t.home}</a><a href="/products">{t.products}</a><a href="/track-order">{t.track}</a><a href="/cart">{t.cart}</a></nav>
+    <p class="menu-label">{t.categories}</p>
+    <nav>{categories.map(([slug]) => <a href={`/category/${slug}`}>{categoryNames[slug][lang]}<span>←</span></a>)}</nav>
+    <a class="button button-primary menu-cta" href={`${alternate.pathname}${alternate.search}`}>{t.language}</a>
+  </aside>
+</div>
+<script>
+  const menu = document.querySelector<HTMLElement>("[data-mobile-menu]");
+  document.querySelectorAll("[data-menu-open]").forEach((button) => button.addEventListener("click", () => { if (menu) { menu.hidden = false; document.body.classList.add("menu-open"); } }));
+  document.querySelectorAll("[data-menu-close]").forEach((button) => button.addEventListener("click", () => { if (menu) { menu.hidden = true; document.body.classList.remove("menu-open"); } }));
+</script>

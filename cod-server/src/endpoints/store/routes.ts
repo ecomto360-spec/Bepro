@@ -11,6 +11,7 @@ import { OpenAPIHono, z } from "@hono/zod-openapi";
 import type { AppContext } from "@/types";
 import { defineRoute } from "@/lib/route-builder";
 import * as h from "./handlers";
+import { trackOrderHandler } from "./tracking-handlers";
 import { storeOrderSchema, storeReviewSchema, validateCartSchema } from "./validation";
 import {
   StoreConfigSchema,
@@ -489,6 +490,7 @@ router.openapi(listStoreCategoriesRoute.route, listStoreCategoriesRoute.handler)
 router.openapi(getShippingRatesRoute.route, getShippingRatesRoute.handler);
 router.openapi(communesRoute.route, communesRoute.handler);
 router.openapi(createStoreOrderRoute.route, createStoreOrderRoute.handler);
+router.post("/track-order", trackOrderHandler);
 router.openapi(validateCartRoute.route, validateCartRoute.handler);
 router.openapi(listStoreReviewsRoute.route, listStoreReviewsRoute.handler);
 router.openapi(submitStoreReviewRoute.route, submitStoreReviewRoute.handler);
