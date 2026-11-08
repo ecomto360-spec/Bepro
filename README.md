@@ -138,7 +138,7 @@ Mesure exécutée sur le build de production local :
 | Bonnes pratiques | 100 |
 | SEO | 100 |
 
-Rapports : `docs/bepro-reports/lighthouse-mobile.report.html` et `.json`.
+Le résultat est consigné dans le rapport de livraison. Les rapports Lighthouse générés ne sont pas conservés dans le dépôt source.
 
 ## Configuration à remplacer avant production
 
@@ -157,8 +157,8 @@ Les transporteurs et l’OTP sont désactivés sans clés. Aucun déploiement Cl
 
 - Rapport final : `docs/bepro-reports/LIVRAISON-2026-11-08.md` ;
 - captures : `docs/bepro-reports/captures/final/` ;
-- sorties brutes : `docs/bepro-reports/logs/` ;
-- diff par rapport à CodFlow : `docs/bepro-reports/codflow-bepro.diff` ;
 - liste des fichiers : `docs/bepro-reports/fichiers-modifies.txt`.
+
+Les logs, rapports générés et anciennes captures sont exclus du dépôt afin de conserver un workspace source léger.
 
 La documentation technique générale de CodFlow reste disponible dans `docs/`.

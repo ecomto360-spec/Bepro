@@ -1,6 +1,0 @@
-
-Running 1 test using 1 worker
-
-  ✓  1 tests/bepro.spec.ts:52:5 › mobile 390 px, arabe RTL et catalogue (6.9s)
-
-  1 passed (8.6s)

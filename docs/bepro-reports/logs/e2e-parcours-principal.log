@@ -1,6 +1,0 @@
-
-Running 1 test using 1 worker
-
-  ✓  1 tests/bepro.spec.ts:5:5 › accueil FR, variantes, panier, checkout COD, confirmation et suivi (39.2s)
-
-  1 passed (41.0s)

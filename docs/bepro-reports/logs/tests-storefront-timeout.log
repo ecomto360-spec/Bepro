@@ -1,7 +1,0 @@
-
-> cod-astro-theme01@1.1.0 test
-> vitest --run
-
-Default inspector port 9229 not available, using 9230 instead
-
-Using secrets defined in .dev.vars

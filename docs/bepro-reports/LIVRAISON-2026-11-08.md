@@ -112,7 +112,7 @@ best-practices: 100
 seo: 100
 ```
 
-Rapports complets : `lighthouse-mobile.report.html` et `lighthouse-mobile.report.json`.
+Les rapports Lighthouse générés ont été retirés lors du nettoyage source-only ; les scores et la commande restent consignés ici.
 
 ## Captures finales
 
@@ -134,7 +134,7 @@ Les captures vitrine ont été refaites sans toolbar Astro.
 
 ## Principaux fichiers modifiés
 
-La liste exhaustive des chemins par rapport à CodFlow `ed79aa9` est dans `fichiers-modifies.txt`. Le diff complet est dans `codflow-bepro.diff`.
+La liste exhaustive des chemins par rapport à CodFlow `ed79aa9` est dans `fichiers-modifies.txt`. Le diff complet peut être régénéré avec `git diff ed79aa9` ; il n’est pas conservé dans le dépôt source.
 
 Principaux ensembles :
 
