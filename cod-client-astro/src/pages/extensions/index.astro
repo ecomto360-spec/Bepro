@@ -1,0 +1,11 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import GateSpinner from "@/features/auth/components/GateSpinner";
+import ExtensionsPageApp from "../../../../extensions/shared/dashboard/ExtensionsPageApp";
+---
+<BaseLayout title="Extensions — bepro">
+  <main class="min-h-screen">
+    <div data-gate-spinner="required" class="flex min-h-screen items-center justify-center"><GateSpinner branded /></div>
+    <div data-auth-gate="required" hidden><ExtensionsPageApp client:only="react" /></div>
+  </main>
+</BaseLayout>

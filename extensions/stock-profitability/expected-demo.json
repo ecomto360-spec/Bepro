@@ -1,0 +1,27 @@
+{
+  "delivered": {
+    "orders": 17,
+    "revenue": 100550,
+    "cogs": 50900,
+    "grossMargin": 49650,
+    "deliveryCharged": 6800,
+    "deliveryCost": 4250,
+    "netProfit": 49650,
+    "marginPercent": 49.38
+  },
+  "returned": {
+    "orders": 3,
+    "revenue": 0,
+    "cogs": 0,
+    "grossMargin": 0,
+    "deliveryCharged": 1200,
+    "deliveryCost": 750,
+    "netProfit": -900,
+    "marginPercent": 0
+  },
+  "globalExpenses": 10000,
+  "resalableReturnedUnits": 4,
+  "nonResalableReturnedUnits": 2,
+  "operationalNetAfterGlobalExpenses": 39650,
+  "finalInventory": 13
+}

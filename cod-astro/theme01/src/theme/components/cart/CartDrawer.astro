@@ -4,8 +4,9 @@ import { copy, type BeproLocale } from "@/theme/content/bepro";
 const { config } = Astro.props as { config: StoreConfig };
 const t = copy[(config.lang === "ar" ? "ar" : "fr") as BeproLocale];
 ---
-<div class="drawer-backdrop" data-cart-backdrop hidden></div>
-<aside class="cart-drawer" data-cart-drawer aria-label={t.cartTitle} hidden>
+<div id="cart-scrim" class="drawer-backdrop" data-cart-backdrop hidden></div>
+<aside id="cart-drawer" class="cart-drawer" data-cart-drawer aria-label={t.cartTitle} hidden>
+  <template data-drawer-line-template><a data-cart-image-link href="/products"><img alt="" /></a><a data-cart-name href="/products"></a></template>
   <div class="drawer-head"><h2>{t.cartTitle} (<span data-cart-count>0</span>)</h2><button class="icon-button" type="button" data-cart-close aria-label={t.close}>×</button></div>
   <div class="drawer-items" data-drawer-items></div>
   <div class="drawer-footer" data-drawer-footer hidden><div class="drawer-total"><span>{t.subtotal}</span><span data-drawer-subtotal></span></div><a class="button button-primary button-block" href="/checkout">{t.checkout}</a><a class="button button-outline button-block" href="/cart">{t.cart}</a></div>
@@ -20,8 +21,8 @@ const t = copy[(config.lang === "ar" ? "ar" : "fr") as BeproLocale];
   const backdrop = document.querySelector<HTMLElement>("[data-cart-backdrop]");
   const list = document.querySelector<HTMLElement>("[data-drawer-items]");
   const footer = document.querySelector<HTMLElement>("[data-drawer-footer]");
-  function openCart() { if (drawer && backdrop) { drawer.hidden = false; backdrop.hidden = false; document.body.classList.add("menu-open"); } }
-  function closeCart() { if (drawer && backdrop) { drawer.hidden = true; backdrop.hidden = true; document.body.classList.remove("menu-open"); } }
+  function openCart() { if (drawer && backdrop) { drawer.hidden = false; backdrop.hidden = false; drawer.setAttribute("data-open", ""); backdrop.setAttribute("data-open", ""); document.body.classList.add("menu-open"); } }
+  function closeCart() { if (drawer && backdrop) { drawer.hidden = true; backdrop.hidden = true; drawer.removeAttribute("data-open"); backdrop.removeAttribute("data-open"); document.body.classList.remove("menu-open"); } }
   document.querySelectorAll("[data-cart-open]").forEach((b) => b.addEventListener("click", openCart));
   document.querySelectorAll("[data-cart-close]").forEach((b) => b.addEventListener("click", closeCart));
   backdrop?.addEventListener("click", closeCart);
@@ -56,3 +57,8 @@ const t = copy[(config.lang === "ar" ? "ar" : "fr") as BeproLocale];
   }
   render(getCart()); subscribe(render);
 </script>
+<style>
+  #cart-drawer[data-open], #cart-scrim[data-open] { visibility: visible; }
+  :global([dir="rtl"]) #cart-drawer { inset-inline: auto 0; }
+  :global([dir="rtl"]) #cart-drawer[data-open] { transform: translateX(0); }
+</style>

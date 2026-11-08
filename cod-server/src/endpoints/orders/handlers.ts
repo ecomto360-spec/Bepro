@@ -17,6 +17,8 @@ import { logActivity, ACTIONS } from "@/lib/activity";
 import { getDeliveryCompanyById } from "@/endpoints/delivery-companies/queries";
 import { NotFoundError, ValidationError, BusinessLogicError } from "@/lib/errors/classes";
 import { ERROR_CODES } from "../../../../cod-shared/errors/codes";
+import { readStockConfig } from "../../../../extensions/shared/server/registry";
+import { emitExtensionEvent } from "../../../../extensions/shared/server/events";
 
 /**
  * GET /orders
@@ -202,7 +204,10 @@ export async function createOrder(c: Context<AppContext>) {
 
     const actor = c.get("user");
     // Create order — passes actor so stock movements are attributed correctly
-    await queries.createOrder(db, orderData, productsData, actor ? { id: actor.id, name: actor.name ?? "Unknown" } : null);
+    const stockExtension = await readStockConfig(db);
+    await queries.createOrder(db, orderData, productsData, actor ? { id: actor.id, name: actor.name ?? "Unknown" } : null,
+      { deductStock: !(stockExtension.enabled && stockExtension.config.deductionTiming !== "order"), allowNegativeStock: stockExtension.enabled && stockExtension.config.stockZeroBehavior === "warn" });
+    await emitExtensionEvent(c, "order.created", orderId, { orderNumber });
     await logActivity(db, actor, ACTIONS.ORDER_CREATED, {
       type: "order", id: orderId, label: orderNumber,
     });
@@ -398,6 +403,8 @@ export async function returnOrderProduct(c: Context<AppContext>) {
 
   const user = c.get("user");
 
+  const stockExtension = await readStockConfig(db);
+  const effectiveResalable = validated.resalable && !(stockExtension.enabled && !stockExtension.config.restockOnReturn);
   let result;
   try {
     result = await queries.setOrderProductReturn(
@@ -407,15 +414,17 @@ export async function returnOrderProduct(c: Context<AppContext>) {
       validated.returnedQuantity,
       user?.id,
       user?.name ?? undefined,
+      effectiveResalable,
     );
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     throw new ValidationError(msg, ERROR_CODES.VALUE_OUT_OF_RANGE, { orderId, productLineId });
   }
 
+  await emitExtensionEvent(c, "order.returned", orderId, { productLineId, returnedQuantity: result.returnedQuantity, resalable: effectiveResalable });
   await logActivity(db, user, ACTIONS.ORDER_PRODUCT_RETURNED, {
     type: "order", id: orderId, label: order.orderNumber,
-  }, { productLineId, returnedQuantity: result.returnedQuantity, status: result.status });
+  }, { productLineId, returnedQuantity: result.returnedQuantity, status: result.status, resalable: validated.resalable });
 
   return c.json({ success: true, data: result, message: "Return recorded" }, 200);
 }

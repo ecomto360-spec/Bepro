@@ -195,6 +195,7 @@ export async function createOrder(
   orderData: typeof orders.$inferInsert,
   productsData: Array<typeof orderProducts.$inferInsert>,
   actor?: { id: string; name: string } | null,
+  options: { deductStock?: boolean; allowNegativeStock?: boolean } = {},
 ) {
   const now = orderData.createdAt ?? new Date().toISOString();
 
@@ -227,7 +228,7 @@ export async function createOrder(
       .where(eq(customers.id, orderData.customerId)),
   );
 
-  for (const item of productsData) {
+  for (const item of options.deductStock === false ? [] : productsData) {
     const qty = item.quantity as number;
 
     const productRow = await db
@@ -238,11 +239,11 @@ export async function createOrder(
 
     if (!productRow?.trackInventory) continue;
 
-    // Guarded deduction, same pattern as the storefront path: the movement's
-    // qtyBefore/qtyAfter are subselects guarded by inventory >= qty. When
-    // stock is insufficient (or a concurrent writer already took it), the
-    // subselects return NULL, the movement insert violates NOT NULL, and the
-    // ENTIRE batch rolls back — no oversell floor, no lost-update race.
+    // Le mode warn de l'extension remplace uniquement la garde de disponibilité ;
+    // le mouvement et la mise à jour restent dans la même transaction atomique.
+    const availability = options.allowNegativeStock ? sql`1=1` : item.variantId
+      ? sql`${productVariants.inventory} >= ${qty}`
+      : sql`${products.inventory} >= ${qty}`;
     if (item.variantId) {
       statements.push(
         db.insert(stockMovements).values({
@@ -251,8 +252,8 @@ export async function createOrder(
           variantId: item.variantId,
           type: "ORDER_DEDUCTED",
           delta: -qty,
-          qtyBefore: sql`(SELECT inventory FROM product_variants WHERE id = ${item.variantId} AND inventory >= ${qty})`,
-          qtyAfter: sql`(SELECT inventory - ${qty} FROM product_variants WHERE id = ${item.variantId} AND inventory >= ${qty})`,
+          qtyBefore: sql`(SELECT inventory FROM product_variants WHERE id = ${item.variantId} AND ${availability})`,
+          qtyAfter: sql`(SELECT inventory - ${qty} FROM product_variants WHERE id = ${item.variantId} AND ${availability})`,
           reason: null,
           reference: orderData.id ?? null,
           createdBy: actor?.id ?? "system",
@@ -270,7 +271,7 @@ export async function createOrder(
           .where(
             and(
               eq(productVariants.id, item.variantId),
-              sql`${productVariants.inventory} >= ${qty}`,
+              availability,
             ),
           ),
       );
@@ -282,8 +283,8 @@ export async function createOrder(
           variantId: null,
           type: "ORDER_DEDUCTED",
           delta: -qty,
-          qtyBefore: sql`(SELECT inventory FROM products WHERE id = ${item.productId} AND inventory >= ${qty})`,
-          qtyAfter: sql`(SELECT inventory - ${qty} FROM products WHERE id = ${item.productId} AND inventory >= ${qty})`,
+          qtyBefore: sql`(SELECT inventory FROM products WHERE id = ${item.productId} AND ${availability})`,
+          qtyAfter: sql`(SELECT inventory - ${qty} FROM products WHERE id = ${item.productId} AND ${availability})`,
           reason: null,
           reference: orderData.id ?? null,
           createdBy: actor?.id ?? "system",
@@ -301,7 +302,7 @@ export async function createOrder(
           .where(
             and(
               eq(products.id, item.productId),
-              sql`${products.inventory} >= ${qty}`,
+              availability,
             ),
           ),
       );
@@ -591,6 +592,8 @@ export async function setOrderProductReturn(
   newReturnedQty: number,
   userId?: string,
   userName?: string,
+  resalable = true,
+  restock = true,
 ): Promise<{
   id: string;
   status: "fulfilled" | "partially_returned" | "returned";
@@ -618,7 +621,7 @@ export async function setOrderProductReturn(
   const currentReturned = line.returnedQuantity ?? 0;
   const delta = newReturnedQty - currentReturned;
 
-  if (delta !== 0) {
+  if (delta !== 0 && resalable) {
     const productRow = await db
       .select({ trackInventory: products.trackInventory })
       .from(products)

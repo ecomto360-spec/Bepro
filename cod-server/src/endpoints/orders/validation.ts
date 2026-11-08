@@ -125,6 +125,7 @@ export const assignDriverSchema = z.object({
  */
 export const returnOrderProductSchema = z.object({
   returnedQuantity: z.number().int().min(0),
+  resalable: z.boolean().optional().default(true),
 });
 
 export const orderFiltersSchema = z.object({

@@ -50,6 +50,7 @@ const orderDetailFallback = {
 // with `export const prerender = false` (currently only /api/auth/*).
 export default defineConfig({
   output: "static",
+  server: { allowedHosts: true },
   // No Astro.session usage (auth is better-auth + its own KV) — docs:
   // session:false skips SESSION KV provisioning and drops the session
   // runtime from the Worker bundle.
@@ -73,6 +74,8 @@ export default defineConfig({
     // (wrangler.toml): Vite's first-class SPA fallback serves the client index
     // for unmatched HTML requests during astro dev only.
     appType: "spa",
+    server: { allowedHosts: true },
+    preview: { allowedHosts: true },
     plugins: [orderDetailFallback, tailwindcss()],
     environments: {
       ssr: {

@@ -15,6 +15,9 @@ import { logActivity, ACTIONS } from "@/lib/activity";
 import { NotFoundError, BusinessLogicError, ValidationError } from "@/lib/errors/classes";
 import { ERROR_CODES, ERROR_CATEGORIES } from "../../../../cod-shared/errors/codes";
 import { shouldTriggerCapiPurchase, shouldTriggerCapiConfirmed, getCapiWorkflowId } from "@/workflows/capi-helpers";
+import { emitExtensionEvent } from "../../../../extensions/shared/server/events";
+import { readStockConfig } from "../../../../extensions/shared/server/registry";
+import { assertOrderStockAvailable } from "../../../../extensions/stock-profitability/server/listener";
 
 /**
  * PATCH /orders/:id/status
@@ -73,7 +76,15 @@ export async function updateStatus(c: Context<AppContext>) {
   // Get user from context (set by auth middleware)
   const user = c.get("user");
 
+  const stockExtension = await readStockConfig(db);
+  if (stockExtension.enabled && stockExtension.config.stockZeroBehavior === "block" && stockExtension.config.deductionTiming === validated.status) {
+    try { await assertOrderStockAvailable(db, orderId); }
+    catch (error) { throw new BusinessLogicError(error instanceof Error ? error.message : String(error), ERROR_CODES.INSUFFICIENT_STOCK, { orderId }); }
+  }
   await queries.updateOrderStatus(db, orderId, validated.status, user?.id, user?.name ?? undefined);
+  if (["confirmed", "dispatched", "delivered", "returned"].includes(validated.status)) {
+    await emitExtensionEvent(c, `order.${validated.status}` as "order.confirmed" | "order.dispatched" | "order.delivered" | "order.returned", orderId, { previousStatus: order.status });
+  }
 
   // Fire CAPI Purchase Workflow — never blocks the status response.
   // waitUntil: the runtime cancels un-awaited promises after the response,

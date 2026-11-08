@@ -1,5 +1,6 @@
 import {
   Building2,
+  Boxes,
   ClipboardList,
   FileText,
   FolderOpen,
@@ -237,6 +238,13 @@ export function useNavSections(): NavSection[] {
           label: tN("sidebar.whatsapp"),
           icon: MessageCircle,
           scope: "whatsapp_widget:read",
+        },
+        {
+          kind: "leaf",
+          href: "/extensions",
+          label: "Extensions",
+          icon: Boxes,
+          scope: "products:read",
         },
         {
           kind: "leaf",

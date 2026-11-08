@@ -3,6 +3,8 @@ import type { AppContext } from "@/types";
 import { getDb } from "@/db";
 import { checkStoreRateLimit } from "./rate-limit";
 import { sendNewOrderEmail } from "./order-notification";
+import { readStockConfig } from "../../../../extensions/shared/server/registry";
+import { emitExtensionEvent } from "../../../../extensions/shared/server/events";
 import * as queries from "./queries";
 import { storeOrderSchema, storeReviewSchema, validateCartSchema } from "./validation";
 import { NotFoundError, ValidationError, ConflictError, BusinessLogicError } from "@/lib/errors/classes";
@@ -309,8 +311,9 @@ export async function createStoreOrder(c: Context<AppContext>) {
     );
   }
 
+  const stockExtension = await readStockConfig(db, c.get("storeId"));
   const stockError = queries.findStockShortfall(snapshot, lines);
-  if (stockError) {
+  if (stockError && !(stockExtension.enabled && stockExtension.config.stockZeroBehavior === "warn")) {
     throw new BusinessLogicError(stockError, ERROR_CODES.INSUFFICIENT_STOCK);
   }
 
@@ -386,8 +389,10 @@ export async function createStoreOrder(c: Context<AppContext>) {
       customerEmail: data.email,
       customFieldAnswers,
     },
-    snapshot
+    snapshot,
+    { deductStock: !(stockExtension.enabled && stockExtension.config.deductionTiming !== "order"), allowNegativeStock: stockExtension.enabled && stockExtension.config.stockZeroBehavior === "warn" }
   );
+  await emitExtensionEvent(c, "order.created", order.id, { orderNumber: order.orderNumber });
 
   await sendNewOrderEmail(db, {
     orderId: order.id,

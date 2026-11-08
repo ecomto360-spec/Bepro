@@ -1,0 +1,35 @@
+{
+  "id": "stock-profitability",
+  "name": "Stock & rentabilité",
+  "version": "1.0.0",
+  "description": "Inventaire, coûts figés, dépenses et rapports de rentabilité COD.",
+  "dashboard": "/extensions/stock-profitability",
+  "api": "/api/extensions/stock-profitability",
+  "migrations": ["0034_stock_profitability.sql"],
+  "events": ["order.created", "order.confirmed", "order.dispatched", "order.delivered", "order.returned", "stock.low"],
+  "configSchema": {
+    "type": "object",
+    "properties": {
+      "deductionTiming": { "type": "string", "enum": ["order", "confirmed", "dispatched"], "default": "order" },
+      "stockZeroBehavior": { "type": "string", "enum": ["block", "warn"], "default": "block" },
+      "restockOnReturn": { "type": "boolean", "default": true },
+      "profitBasis": { "type": "string", "enum": ["delivered", "forecast"], "default": "delivered" },
+      "lowStockAlert": { "type": "boolean", "default": true },
+      "lowStockEmail": { "type": "boolean", "default": false },
+      "defaultPackagingFee": { "type": "number", "minimum": 0, "default": 0 },
+      "defaultConfirmationFee": { "type": "number", "minimum": 0, "default": 0 },
+      "defaultAdCost": { "type": "number", "minimum": 0, "default": 0 }
+    }
+  },
+  "defaultConfig": {
+    "deductionTiming": "order",
+    "stockZeroBehavior": "block",
+    "restockOnReturn": true,
+    "profitBasis": "delivered",
+    "lowStockAlert": true,
+    "lowStockEmail": false,
+    "defaultPackagingFee": 0,
+    "defaultConfirmationFee": 0,
+    "defaultAdCost": 0
+  }
+}

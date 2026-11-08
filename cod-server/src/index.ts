@@ -41,6 +41,8 @@ import { openApiValidationHook } from "@/openapi/validation-hook";
 import mcpManagementRoutes from "@/endpoints/mcp/routes";
 import analyticsRoutes from "@/endpoints/analytics/routes";
 import abandonedOrdersRoutes from "@/endpoints/abandoned-orders/routes";
+import { extensionRegistryRoutes } from "../../extensions/shared/server/registry-routes";
+import { stockProfitabilityRoutes } from "../../extensions/stock-profitability/server/routes";
 import storeAbandonedRoutes from "@/endpoints/abandoned-orders/store-routes";
 import storeOtpRoutes from "@/endpoints/store-otp/store-routes";
 
@@ -137,6 +139,8 @@ app.route("/api/products", productStockRouter);
 app.route("/api/mcp", mcpManagementRoutes);
 app.route("/api/analytics", analyticsRoutes);
 app.route("/api/abandoned-orders", abandonedOrdersRoutes);
+app.route("/api/extensions", extensionRegistryRoutes);
+app.route("/api/extensions/stock-profitability", stockProfitabilityRoutes);
 
 // 404 handler
 app.notFound((c) => {

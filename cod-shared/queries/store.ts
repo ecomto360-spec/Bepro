@@ -604,13 +604,17 @@ type BatchStatement = Parameters<AppDb["batch"]>[0][number];
 function buildDeductStatements(
   db: AppDb,
   input: DeductStockInput,
+  allowNegativeStock = false,
 ): BatchStatement[] {
   const { productId, variantId, quantity, orderId, customerId, customerName, now } = input;
 
+  const availability = allowNegativeStock ? sql`1=1` : variantId !== null
+    ? sql`${productVariants.inventory} >= ${quantity}`
+    : sql`${products.inventory} >= ${quantity}`;
   const guard =
     variantId !== null
-      ? sql`FROM ${productVariants} WHERE ${productVariants.id} = ${variantId} AND ${productVariants.inventory} >= ${quantity}`
-      : sql`FROM ${products} WHERE ${products.id} = ${productId} AND ${products.inventory} >= ${quantity}`;
+      ? sql`FROM ${productVariants} WHERE ${productVariants.id} = ${variantId} AND ${availability}`
+      : sql`FROM ${products} WHERE ${products.id} = ${productId} AND ${availability}`;
   const inventoryColumn =
     variantId !== null ? productVariants.inventory : products.inventory;
 
@@ -622,7 +626,7 @@ function buildDeductStatements(
           .where(
             and(
               eq(productVariants.id, variantId),
-              sql`${productVariants.inventory} >= ${quantity}`,
+              availability,
             ),
           )
       : db
@@ -631,7 +635,7 @@ function buildDeductStatements(
           .where(
             and(
               eq(products.id, productId),
-              sql`${products.inventory} >= ${quantity}`,
+              availability,
             ),
           );
 
@@ -668,6 +672,7 @@ export async function createStoreOrder(
    * Omitted (tests, other callers) the engine loads its own.
    */
   preloaded?: CatalogSnapshot,
+  options: { deductStock?: boolean; allowNegativeStock?: boolean } = {},
 ) {
   const id = crypto.randomUUID();
   const now = new Date().toISOString();
@@ -882,7 +887,7 @@ export async function createStoreOrder(
   );
 
   for (const input of deductions) {
-    statements.push(...buildDeductStatements(db, input));
+    if (options.deductStock !== false) statements.push(...buildDeductStatements(db, input, options.allowNegativeStock));
   }
 
   await db.batch(statements as [BatchStatement, ...BatchStatement[]]);

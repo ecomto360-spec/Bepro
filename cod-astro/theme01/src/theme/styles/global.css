@@ -19,3 +19,150 @@
 @media(max-width:1000px){.product-grid{grid-template-columns:repeat(3,1fr)}.product-grid-featured{grid-template-columns:repeat(3,1fr)}.category-link{display:none}.footer-grid{grid-template-columns:1.3fr 1fr 1fr}.footer-grid>div:last-child{grid-column:1/-1}.checkout-layout{grid-template-columns:1fr 330px}.hero-grid{gap:25px}.hero h1{font-size:3.4rem}}
 @media(max-width:760px){.desktop-nav{display:none}.container{width:min(calc(100% - 28px),var(--container))}.section{padding:48px 0}.desktop-only{display:none!important}.mobile-only{display:grid!important}.mobile-menu[hidden]{display:none!important}.top-marquee{height:32px}.bepro-header{top:0}.header-main{height:65px;gap:8px;justify-content:space-between}.brand{font-size:1.8rem}.brand-mark{width:32px}.header-actions{margin:0;gap:0}.language-link{display:none}.category-row{display:none}.hero{padding:20px 0 45px}.hero-grid{grid-template-columns:1fr;min-height:0;gap:10px}.hero-copy{padding:18px 0 0}.hero h1{font-size:clamp(2.45rem,12vw,3.6rem);margin:14px 0 17px}.hero-copy>p:not(.hero-eyebrow){font-size:.95rem}.hero-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:23px}.hero-actions .button{padding:10px;font-size:.82rem}.hero-proof{gap:12px;font-size:.7rem;margin-top:24px}.hero-art{margin-top:10px}.hero-art img{border-radius:20px;aspect-ratio:1.35;object-fit:cover}.hero-card{inset-inline-start:10px;bottom:10px;padding:10px 13px}.hero-card-icon{width:34px;height:34px}.category-tiles{grid-template-columns:repeat(3,1fr);gap:8px;margin-top:-15px}.category-tile{padding:15px 7px;font-size:.68rem}.category-tile:nth-child(n+4){display:none}.section-head{display:block;margin-bottom:22px}.section-head .button{margin-top:15px}.section-head h2,.section-title{font-size:1.85rem}.section-head p{font-size:.9rem}.product-grid,.product-grid-featured{grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}.product-body{padding:12px}.product-name{font-size:.82rem;min-height:48px}.price-current{font-size:.95rem}.price-old{font-size:.7rem}.product-card .button{font-size:.72rem;padding:7px}.discount-badge{font-size:.63rem;top:8px;inset-inline-start:8px}.stock-note{display:none}.review-grid{grid-template-columns:1fr;gap:12px}.review-card{padding:20px}.reassurance-grid{grid-template-columns:1fr 1fr;gap:22px 12px}.reassurance-item{display:block}.reassurance-icon{width:42px;height:42px;margin-bottom:10px}.reassurance-item strong{font-size:.82rem}.reassurance-item small{font-size:.7rem}.footer-grid{grid-template-columns:1fr 1fr;gap:35px 20px}.footer-brand{grid-column:1/-1}.footer-grid>div:last-child{grid-column:auto}.footer-bottom{display:block;line-height:2}.has-mobile-nav body,body.has-mobile-nav{padding-bottom:72px}.mobile-bottom-nav{position:fixed;bottom:0;left:0;right:0;height:70px;background:#fff;border-top:1px solid var(--line);z-index:100;grid-template-columns:repeat(4,1fr);padding-bottom:env(safe-area-inset-bottom)}.mobile-bottom-nav a,.mobile-bottom-nav button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border:0;background:none;font-size:.62rem;color:#64748b;padding:4px}.mobile-bottom-nav svg{width:23px;height:23px}.mobile-bottom-nav [aria-current=page]{color:var(--primary)}.mobile-cart-icon{position:relative}.mobile-cart-icon b{position:absolute;top:-7px;inset-inline-end:-10px;background:var(--accent);color:#fff;border-radius:20px;min-width:17px;height:17px;font-size:.58rem;display:grid;place-items:center}.whatsapp-float{bottom:84px;inset-inline-end:16px;width:50px;height:50px}.mobile-menu{position:fixed;inset:0;z-index:300;display:block!important}.menu-backdrop{position:absolute;inset:0;border:0;background:rgba(3,15,30,.6);width:100%;height:100%}.menu-panel{position:absolute;top:0;bottom:0;inset-inline-start:0;width:min(340px,88%);background:#fff;padding:20px;overflow:auto}.menu-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:25px}.menu-head strong{font-size:1.8rem;color:var(--primary)}.menu-panel nav{display:grid}.menu-panel nav a{min-height:50px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);font-weight:700}.menu-label{margin:25px 0 8px;color:var(--muted);font-size:.75rem;font-weight:900;text-transform:uppercase}.menu-cta{margin-top:25px;width:100%}.menu-open{overflow:hidden}.page-hero{padding:32px 0}.catalog-toolbar{display:block}.catalog-controls{margin-top:15px;display:grid;grid-template-columns:1fr 1fr}.catalog-controls .field-select{min-width:0}.product-detail{padding:25px 0}.product-detail-grid{grid-template-columns:1fr;gap:25px}.product-info h1{font-size:2rem}.product-purchase{position:relative}.product-purchase .button{font-size:.8rem;padding:10px}.drawer-item{grid-template-columns:64px 1fr auto}.drawer-item img{width:64px;height:64px}.cart-page-grid,.checkout-layout{grid-template-columns:1fr;gap:22px}.cart-summary,.checkout-summary{position:static}.cart-line{grid-template-columns:80px 1fr;gap:12px;padding:12px}.cart-line img{width:80px;height:80px}.cart-line>.drawer-item-price{grid-column:2}.checkout-form{padding:18px}.form-grid{grid-template-columns:1fr}.form-field-full{grid-column:auto}.delivery-options{grid-template-columns:1fr}.track-box{padding:20px}.track-form{grid-template-columns:1fr}.tracking-step{font-size:.58rem}.bepro-toast{bottom:85px;font-size:.82rem;white-space:normal;width:max-content}.checkout-success{margin:35px auto}.success-icon{width:65px;height:65px}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition:none!important}.marquee-track{animation:none}}
+/* Rich descriptions: the platform sanitises merchant HTML before rendering.
+ * markup is sanitised at the write chokepoint against the allow-list in
+ * cod-shared/lib/rich-text.ts (ADR 0002); this section only styles the tags
+ * that allow-list permits, using theme tokens (never raw design values).
+ * Anything not listed here cannot reach the DOM, because it is stripped
+ * upstream — so there is no need for defensive `all: unset` resets.
+ */
+.rich-description > :first-child { margin-top: 0; }
+.rich-description > :last-child { margin-bottom: 0; }
+
+.rich-description {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.rich-description p,
+.rich-description div,
+.rich-description span,
+.rich-description li {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  max-width: 100%;
+}
+.rich-description p { margin: 0 0 0.85em; }
+.rich-description strong, .rich-description b { font-weight: 800; color: var(--clr-text); }
+.rich-description em, .rich-description i { font-style: italic; }
+.rich-description u { text-decoration: underline; }
+.rich-description s, .rich-description strike { text-decoration: line-through; }
+.rich-description sub, .rich-description sup { font-size: 0.75em; line-height: 0; }
+.rich-description hr { border: 0; border-top: 1px solid var(--clr-border); margin: 1.25em 0; }
+
+.rich-description h2, .rich-description h3, .rich-description h4,
+.rich-description h5, .rich-description h6 {
+  font-weight: 800; color: var(--clr-text); line-height: 1.3; margin: 1.2em 0 0.5em;
+}
+.rich-description h2 { font-size: 1.35em; }
+.rich-description h3 { font-size: 1.2em; }
+.rich-description h4 { font-size: 1.1em; }
+.rich-description h5 { font-size: 1em; }
+.rich-description h6 { font-size: 0.95em; }
+
+.rich-description ul, .rich-description ol { margin: 0 0 0.85em; padding-inline-start: 1.4em; }
+.rich-description ul { list-style: disc; }
+.rich-description ol { list-style: decimal; }
+.rich-description li { margin: 0.25em 0; }
+.rich-description li > ul, .rich-description li > ol { margin-top: 0.25em; margin-bottom: 0; }
+
+.rich-description blockquote {
+  margin: 1em 0; padding-inline-start: 1em;
+  border-inline-start: 3px solid var(--clr-border); color: var(--clr-text-2);
+}
+
+.rich-description a {
+  color: var(--clr-primary); text-decoration: underline; text-underline-offset: 2px;
+}
+.rich-description a:hover { opacity: 0.85; }
+
+.rich-description img {
+  max-width: 100%; height: auto; margin: 0.5em 0;
+  border-radius: var(--radius-input); background: var(--clr-surface-alt);
+}
+.rich-description figure { margin: 1em 0; }
+.rich-description figcaption {
+  font-size: 0.85em; color: var(--clr-text-2); text-align: center; margin-top: 0.4em;
+}
+
+.rich-description code {
+  font-family: var(--font-mono); font-size: 0.9em;
+  background: var(--clr-surface-alt); border: 1px solid var(--clr-border);
+  border-radius: 0.35rem; padding: 0.1em 0.35em;
+}
+.rich-description pre {
+  background: var(--clr-surface-alt); border: 1px solid var(--clr-border);
+  border-radius: var(--radius-input); padding: 0.85em 1em;
+  overflow-x: auto; margin: 0 0 0.85em;
+}
+.rich-description pre code { background: none; border: 0; padding: 0; }
+
+/* display:block + overflow-x lets wide tables scroll instead of overflowing. */
+.rich-description table {
+  display: block; width: 100%; overflow-x: auto;
+  border-collapse: collapse; margin: 0 0 0.85em; font-size: 0.95em;
+}
+.rich-description th, .rich-description td {
+  border: 1px solid var(--clr-border); padding: 0.5em 0.65em;
+  text-align: start; vertical-align: top;
+}
+.rich-description th { background: var(--clr-surface-alt); font-weight: 800; color: var(--clr-text); }
+.rich-description thead th { border-bottom-width: 2px; }
+
+/* Rich text: the three features the editor template writes as attributes.
+   Each is allowed at the write chokepoint (see ADR 0002) and rendered here —
+   the storefront is the only place a merchant's intent becomes visual. */
+
+/* Highlight — the merchant's colour travels as an inline background, a hex or
+   the rgb() a browser re-serialises it into; `data-color` carries the hex. That
+   inline declaration outranks the one below, which is only the fallback for a
+   mark stored without a colour. The text colour is set here rather than stored,
+   so a highlight reads against the storefront palette instead of inheriting
+   whatever colour surrounds it. */
+.rich-description mark {
+  background-color: color-mix(in srgb, var(--clr-accent) 45%, transparent);
+  color: var(--clr-text);
+  border-radius: var(--radius-input);
+  padding: 0 0.15em;
+}
+
+/* Text alignment — written as an inline text-align on paragraphs and headings,
+   so the browser applies it; nothing to restate here. */
+
+/* Checklists — a task list is a `ul[data-type="taskList"]` whose items carry
+   `data-checked`. The sanitiser drops the editor's checkbox input, so the box
+   is drawn here from the attribute. */
+.rich-description ul[data-type="taskList"] {
+  list-style: none;
+  padding-inline-start: 0;
+}
+
+.rich-description ul[data-type="taskList"] li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5em;
+}
+
+.rich-description ul[data-type="taskList"] li::before {
+  content: "";
+  flex: none;
+  width: 1em;
+  height: 1em;
+  margin-top: 0.3em;
+  border: 1px solid var(--clr-border);
+  background: var(--clr-surface-alt);
+  border-radius: var(--radius-input);
+}
+
+.rich-description ul[data-type="taskList"] li[data-checked="true"]::before {
+  background: var(--clr-primary);
+  border-color: var(--clr-primary);
+}
+
+/* The editor's list schema wraps item content in a paragraph; without this the
+   last line of every list item would carry a trailing gap. */
+.rich-description li > p {
+  margin-bottom: 0;
+}
