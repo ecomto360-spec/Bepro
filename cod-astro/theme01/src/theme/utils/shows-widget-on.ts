@@ -41,7 +41,7 @@ export function showsWidgetOn(
     return Boolean(surfaces.checkout);
   }
 
-  if (pathname === "/thank-you") {
+  if (pathname === "/thank-you" || pathname === "/merci") {
     return Boolean(surfaces.thankYou);
   }
 

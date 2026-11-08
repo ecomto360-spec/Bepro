@@ -9,8 +9,8 @@ const t = copy[lang];
   <div class="container footer-grid">
     <div class="footer-brand"><a class="brand brand-light" href="/"><span>bepro<span>.</span></span></a><p>{t.footerText}</p><div class="footer-badges"><span>COD</span><span>58 {lang === "ar" ? "ولاية" : "wilayas"}</span></div></div>
     <div><h2>{t.categories}</h2><nav>{Object.entries(categoryNames).map(([slug, names]) => <a href={`/category/${slug}`}>{names[lang]}</a>)}</nav></div>
-    <div><h2>{t.usefulLinks}</h2><nav><a href="/products">{t.products}</a><a href="/track-order">{t.track}</a><a href="/cart">{t.cart}</a><a href="/pages/terms">{t.terms}</a><a href="/pages/privacy-policy">{t.privacy}</a><a href="/pages/refund-policy">{t.returns}</a></nav></div>
-    <div><h2>{t.contact}</h2><address><a href="tel:+213550000000" dir="ltr">{t.phoneDisplay}</a><a href={`mailto:${t.email}`}>{t.email}</a><small>{t.placeholderContact}</small><a class="footer-whatsapp" href="https://wa.me/213550000000" target="_blank" rel="noopener">WhatsApp ↗</a></address></div>
+    {config.pages?.length ? <div><h2>{t.usefulLinks}</h2><nav><a href="/products">{t.products}</a><a href="/track-order">{t.track}</a><a href="/cart">{t.cart}</a>{config.pages.map((page) => <a href={`/pages/${page.slug}`}>{page.title}</a>)}</nav></div> : null}
+    <div><h2>WhatsApp</h2><address><a href="tel:+213550000000" dir="ltr">{t.phoneDisplay}</a><a href={`mailto:${t.email}`}>{t.email}</a><small>{t.placeholderContact}</small><a class="footer-whatsapp" href="https://wa.me/213550000000" target="_blank" rel="noopener">WhatsApp ↗</a></address></div>
   </div>
   <div class="container footer-bottom"><span>© {new Date().getFullYear()} bepro. {lang === "ar" ? "كل الحقوق محفوظة." : "Tous droits réservés."}</span><span>{lang === "ar" ? "رياضة، ببساطة." : "Le sport, simplement."}</span></div>
 </footer>

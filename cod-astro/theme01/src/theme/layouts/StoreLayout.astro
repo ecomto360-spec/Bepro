@@ -43,7 +43,7 @@ const fontHref = "https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;60
     {!marketing && <Footer config={config} content={content} />}
     {!marketing && <CartDrawer config={config} content={content} />}
     {!hideMobileNav && <MobileNav config={config} />}
-    {!marketing && <WhatsAppWidget config={config} />}
+    {!marketing && <WhatsAppWidget config={config} widget={config.whatsapp} content={content} />}
     {!marketing && <ProductScripts config={config} />}
     <div class="bepro-toast" role="status" aria-live="polite" data-bepro-toast hidden></div>
     <script type="application/ld+json" set:html={JSON.stringify({ "@context": "https://schema.org", "@type": "SportingGoodsStore", name: "bepro", url: Astro.url.origin, telephone: "+213550000000", address: { "@type": "PostalAddress", addressCountry: "DZ" }, priceRange: "DZD" })} />

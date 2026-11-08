@@ -68,3 +68,14 @@ partner-client-astro/
 # Playwright local artifacts
 test-results/
 playwright-report/
+
+# Workspace source-only policy
+.next/
+dist/
+.output/
+.env.*
+!.env.example
+*.log
+.cache/
+.npm/
+__pycache__/

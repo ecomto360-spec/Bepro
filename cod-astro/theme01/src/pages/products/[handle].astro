@@ -33,6 +33,9 @@ const structured = { "@context": "https://schema.org", "@type": "Product", name,
   <script type="application/ld+json" set:html={JSON.stringify(structured)} />
   <script>
     import "@/theme/scripts/cart";
+    import "@/theme/scripts/otp-step.ts";
+    import "@/theme/scripts/track-abandonment.ts";
+    import "@/theme/scripts/turnstile-field.ts";
     const buttons = document.querySelectorAll<HTMLButtonElement>("[data-product]");
     const quantity = document.querySelector<HTMLInputElement>("[data-qty]");
     function payload() { return JSON.parse(buttons[0]?.dataset.product || "{}"); }
