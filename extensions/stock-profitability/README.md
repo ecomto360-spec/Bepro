@@ -83,7 +83,10 @@ Depuis la racine du dépôt :
 
 ```bash
 node extensions/stock-profitability/seed-demo.mjs
-node cod-server/scripts/d1.mjs execute --local --persist-to ../.wrangler-shared --file extensions/stock-profitability/seed-demo.sql
+cd cod-server
+node scripts/d1.mjs execute --local --persist-to ../.wrangler-shared --file ../extensions/stock-profitability/seed-demo.sql
+node scripts/d1.mjs execute --local --persist-to ../.wrangler-shared --file ../extensions/stock-profitability/verify-demo.sql
+cd ..
 ```
 
 Résultats attendus : 20 commandes, 17 livrées, 3 retournées, 22 mouvements, stock final de la variante démo égal à 13. Les valeurs détaillées sont dans `expected-demo.json` et la procédure de comparaison SQL dans `docs/VALIDATION-LOCALE.md`.
